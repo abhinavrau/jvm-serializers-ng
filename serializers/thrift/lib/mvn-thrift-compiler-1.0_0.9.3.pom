@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.github.ccascone</groupId>
+    <artifactId>mvn-thrift-compiler</artifactId>
+    <version>1.0_0.9.3</version>
+    <packaging>jar</packaging>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Pre-compiled Apache Thrift binaries distribution</description>
+    <url>https://github.com/ccascone/mvn-thrift-compiler</url>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Carmelo Cascone</name>
+            <email>carmelo@ccascone.net</email>
+            <organization>ccascone.net</organization>
+            <organizationUrl>http://ccascone.net</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git@github.com:ccascone/mvn-thrift-compiler.git</connection>
+        <developerConnection>scm:git:git@github.com:ccascone/mvn-thrift-compiler.git</developerConnection>
+        <url>git@github.com:ccascone/mvn-thrift-compiler.git</url>
+    </scm>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>exe</directory>
+            </resource>
+        </resources>
+    </build>
+
+</project>

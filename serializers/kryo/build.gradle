@@ -1,0 +1,27 @@
+group 'com.github.jvm-serializers'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+
+repositories {
+    mavenCentral()
+
+}
+
+
+dependencies {
+    compile project(':core')
+    compile 'com.esotericsoftware:kryo:4.0.2'
+    //compile name: 'objenesis-1.2'
+
+    testCompile project (path: ':core', configuration: 'testArchives')
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}

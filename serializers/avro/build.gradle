@@ -1,0 +1,41 @@
+group 'com.github.jvm-serializers-ng'
+version '1.0-SNAPSHOT'
+
+apply plugin: "java"
+apply plugin: "idea"
+apply plugin: "com.commercehub.gradle.plugin.avro"
+
+
+// Earlier versions of Gradle
+buildscript {
+    repositories {
+        jcenter()
+
+    }
+    dependencies {
+        classpath "com.commercehub.gradle.plugin:gradle-avro-plugin:0.14.0"
+
+    }
+}
+
+
+repositories {
+    mavenCentral()
+
+}
+
+
+dependencies {
+    compile project(':core')
+    compile "org.apache.avro:avro:1.8.2"
+    testCompile project (path: ':core', configuration: 'testArchives')
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}
+

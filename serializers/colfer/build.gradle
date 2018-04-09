@@ -1,0 +1,77 @@
+group 'com.github.jvm-serializers-ng'
+version '1.0-SNAPSHOT'
+
+apply plugin: "java"
+apply plugin: "com.github.dkorotych.gradle-maven-exec"
+apply plugin: "idea"
+
+// Earlier versions of Gradle
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+
+    }
+    dependencies {
+        classpath "gradle.plugin.com.github.dkorotych.gradle.maven.exec:gradle-maven-exec-plugin:1.2.2.1"
+
+    }
+}
+
+
+repositories {
+    mavenCentral()
+
+}
+
+
+dependencies {
+    compile project(':core')
+
+    testCompile project (path: ':core', configuration: 'testArchives')
+}
+
+sourceSets {
+    main
+    {
+        java {
+            srcDirs = ['src/main/java','target/generated-sources']
+        }
+
+    }
+}
+idea {
+    module {
+        // Marks the already(!) added srcDir as "generated"
+        generatedSourceDirs += file('target/generated-sources')
+    }
+}
+
+
+task generateColfer(type: MavenExec) {
+    goals 'generate-sources'
+}
+
+task cleanColfer(type: MavenExec) {
+    goals 'clean'
+}
+
+
+compileJava{
+    dependsOn generateColfer
+}
+
+clean{
+    dependsOn cleanColfer
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}
+

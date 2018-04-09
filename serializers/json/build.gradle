@@ -1,0 +1,41 @@
+group 'com.github.jvm-serializers'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+
+
+repositories {
+    mavenCentral()
+
+}
+
+dependencies {
+    compile project(':core')
+    compile 'org.json:json:20180130'
+    compile 'net.sf.json-lib:json-lib:2.4:jdk15'
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    compile 'net.minidev:json-smart:2.3'
+    compile 'com.github.cliftonlabs:json-simple:3.0.2'
+    compile 'cc.plural:jsonij:0.2.7'
+    compile 'com.jayway.jsonpath:json-path:2.4.0'
+    compile 'com.alibaba:fastjson:1.2.46'
+    compile 'net.sf.flexjson:flexjson:3.3'
+    compile 'com.dslplatform:dsl-json:1.7.1'
+    compile 'com.google.code.gson:gson:2.8.2'
+    compile 'net.sourceforge.argo:argo:5.4'
+    compile 'net.sf.ezmorph:ezmorph:1.0.6'
+    compile 'com.google.code.svenson:svenson:1.5.8'
+    compile 'commons-beanutils:commons-beanutils-core:1.8.3'
+    compile 'org.apache.commons:commons-collections4:4.1'
+    compile 'org.apache.commons:commons-lang3:3.7'
+    testCompile project (path: ':core', configuration: 'testArchives')
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}

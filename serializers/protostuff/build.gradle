@@ -1,0 +1,84 @@
+group 'com.github.jvm-serializers'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    protoCompile
+}
+
+dependencies {
+    compile project(':core')
+
+    compile 'io.protostuff:protostuff-core:1.6.0'
+    compile 'io.protostuff:protostuff-collectionschema:1.6.0'
+    compile 'io.protostuff:protostuff-json:1.6.0'
+    compile 'io.protostuff:protostuff-runtime:1.6.0'
+    compile 'io.protostuff:protostuff-xml:1.6.0'
+    compile 'io.protostuff:protostuff-compiler:1.6.0'
+    compile 'com.dyuproject.protostuff:protostuff:1.1.3'
+    protoCompile "io.protostuff:protostuff-cli:2.2.18"
+    testCompile project (path: ':core', configuration: 'testArchives')
+}
+
+project.ext.generatedSourcesPath = "src/main/generated-sources"
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src//main/java'
+            srcDirs generatedSourcesPath
+        }
+    }
+}
+
+clean
+{
+    delete generatedSourcesPath
+}
+
+idea {
+    module {
+        // Marks the already(!) added srcDir as "generated"
+        generatedSourceDirs += file(generatedSourcesPath)
+    }
+}
+
+
+task generateProtoStuff() {
+    //java -Dsource=$$< -Doutput=java_bean -Doptions=builder_pattern,generate_field_map,separate_schema -DoutputDir=build/gen/$(2) -jar $(protostuff_compiler)
+    //commandLine 'java', '-Dsource=src/main/protostuff/media.protostuff.proto', '-Doutput=java_bean', '-Doptions=builder_pattern,generate_field_map,separate_schema', '-DoutputDir=src/main/java', '-classpath', "${configurations.lol.files.a}"
+    ant.java(classname: 'io.protostuff.compiler.cli.ProtostuffCompilerCli', fork: 'true', failOnError: 'true') {
+        arg(value: "src/main/protostuff/media.protostuff.proto")
+        arg(value: '-g=java')
+        arg(value: '-o=' +  generatedSourcesPath)
+        classpath {
+            pathElement(path: configurations.protoCompile.asPath)
+        }
+    }
+}
+
+compileJava{
+    dependsOn generateProtoStuff
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}

@@ -1,0 +1,26 @@
+group 'com.github.jvm-serializers-ng'
+version '1.0-SNAPSHOT'
+
+subprojects
+{
+
+    apply plugin: 'java'
+
+    sourceCompatibility = 1.8
+
+    repositories {
+        mavenCentral()
+
+    }
+
+    dependencies {
+        compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
+        compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
+        compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.0'
+        testCompile "junit:junit:4+"
+    }
+
+
+
+
+}

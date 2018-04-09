@@ -1,0 +1,27 @@
+group 'com.github.jvm-serializers'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+
+repositories {
+    mavenCentral()
+
+}
+
+dependencies {
+    compile project(':core')
+    compile 'org.jboss.marshalling:jboss-marshalling-osgi:2.0.5.Final'
+    compile 'jboss:jboss-serialization:4.2.2.GA'
+    testRuntime 'trove:trove:1.0.2'
+    testRuntime  'log4j:log4j:1.2.17'
+    testCompile project (path: ':core', configuration: 'testArchives')
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}

@@ -1,0 +1,33 @@
+group 'com.github.jvm-serializers'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':core')
+    compile 'org.codehaus.woodstox:stax2-api:4.1'
+    compile 'javax.xml.stream:stax-api:1.0-2'
+    compile 'com.thoughtworks.xstream:xstream:1.4.10'
+    compile 'org.javolution:javolution-core-java:6.0.0'
+    compile 'com.siemens.ct.exi:exificient:0.9.7'
+    compile 'com.fasterxml:aalto-xml:1.1.0'
+    compile 'org.codehaus.woodstox:woodstox-core-asl:4.4.1'
+    compile 'com.sun.xml.fastinfoset:FastInfoset:1.2.13'
+
+    //compile name: 'fst-1.42'
+    testCompile project (path: ':core', configuration: 'testArchives')
+
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}

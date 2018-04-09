@@ -1,0 +1,35 @@
+group 'com.github.jvm-serializers-ng'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'scala'
+
+
+repositories {
+    jcenter()
+
+}
+
+dependencies {
+
+
+    compile project(':core')
+    // Use Scala 2.11 in our library project
+    compile 'org.scala-lang:scala-library:2.11.2'
+    compile 'org.scala-lang:scala-reflect:2.11.2'
+    compile 'org.scala-lang.modules:scala-xml_2.11:1.0.2'
+    compile fileTree(dir: 'lib', include: 'sbinary_2.11-0.4.3-SNAPSHOT.jar')
+
+    // Use Scalatest for testing our library
+    testCompile 'org.scalatest:scalatest_2.11:3.0.4'
+
+    testCompile project (path: ':core', configuration: 'testArchives')
+
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}

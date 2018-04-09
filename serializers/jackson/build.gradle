@@ -1,0 +1,46 @@
+group 'com.github.jvm-serializers-ng'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+
+buildscript {
+    repositories {
+        jcenter()
+
+    }
+    dependencies {
+        classpath "com.commercehub.gradle.plugin:gradle-avro-plugin:0.14.0"
+
+    }
+}
+
+dependencies {
+    compile project(':core')
+    compile project(':serializers:avro')
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.1'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.1'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-avro:2.9.1'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.9.1'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.9.1'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.1'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.1'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-protobuf:2.9.1'
+    compile 'com.fasterxml.jackson.jr:jackson-jr-objects:2.9.1'
+    compile 'com.fasterxml.jackson.module:jackson-module-afterburner:2.9.1'
+    compile 'com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.1'
+    compile 'org.codehaus.woodstox:stax2-api:3.1.4'
+    compile 'com.fasterxml:aalto-xml:1.0.0'
+    compile 'cc.plural:jsonij:0.2.7'
+
+    testCompile project (path: ':core', configuration: 'testArchives')
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}

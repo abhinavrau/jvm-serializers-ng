@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <artifactId>colfer-maven</artifactId>
+    <groupId>com.github.jvm-serializers-ng</groupId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <dependencies>
+
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.quies.colfer</groupId>
+                <artifactId>colfer-maven-plugin</artifactId>
+                <version>1.11.2</version>
+                <configuration>
+                    <sizeMax>2 * 1024</sizeMax>
+                    <listMax>99</listMax>
+                    <formatSchema>true</formatSchema>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>colf-java</id>
+                        <goals><goal>compile</goal></goals>
+                        <configuration>
+                            <packagePrefix>serializers.colfer</packagePrefix>
+                            <sourceTarget>${project.build.directory}/generated-sources/</sourceTarget>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.build.directory}/generated-sources/</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

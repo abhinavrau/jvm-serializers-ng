@@ -1,0 +1,111 @@
+group 'com.github.jvm-serializers-ng'
+version '1.0-SNAPSHOT'
+
+
+// Earlier versions of Gradle
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        mavenLocal()
+    }
+    dependencies {
+        classpath "gradle.plugin.com.github.dkorotych.gradle.maven.exec:gradle-maven-exec-plugin:1.2.2.1"
+        classpath "gradle.plugin.org.jruyi.gradle:thrift-gradle-plugin:0.4.0"
+        classpath 'com.google.gradle:osdetector-gradle-plugin:1.4.0'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.jruyi.thrift'
+apply plugin: 'com.google.osdetector'
+apply plugin: "com.github.dkorotych.gradle-maven-exec"
+
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+project.ext.generatedSourcesPath = "src/main/generated-sources"
+project.ext.pathToThriftMavenCompilerPlugin = "lib/mvn-thrift-compiler-1.0_0.9.3.jar"
+project.ext.pathToThriftMavenCompilerPluginPom = "lib/mvn-thrift-compiler-1.0_0.9.3.pom"
+project.ext.generatedSourcesPath = "src/main/generated-sources"
+project.ext.thriftCompilerPath = "target/thrift-compiler/"
+project.ext.thriftCompilerExecutable = "thrift-" + osdetector.classifier + ".exe"
+
+dependencies {
+    compile project(':core')
+    compile "org.slf4j:slf4j-api:1.7.20"
+    compile "org.apache.thrift:libthrift:0.9.3"
+    testCompile project (path: ':core', configuration: 'testArchives')
+
+}
+
+
+idea {
+    module {
+        // Marks the already(!) added srcDir as "generated"
+        generatedSourceDirs += file(generatedSourcesPath)
+    }
+}
+
+compileThrift {
+    thriftExecutable thriftCompilerPath + thriftCompilerExecutable
+    sourceDir  "src/main/thrift"
+    outputDir  generatedSourcesPath
+    generator  'java'
+    createGenFolder false
+}
+
+// Set execute permission. May fail on windows :-(
+task setThriftCompilerFilepermission(type: Exec) {
+    commandLine 'chmod', '700', thriftCompilerPath + thriftCompilerExecutable
+}
+
+// Need to do this for now since this plugin is not in Maven central
+task installThriftMavenCompilerPluginToLocalRepo(type: Exec) {
+    commandLine 'mvn', 'install:install-file','-Dfile=' + pathToThriftMavenCompilerPlugin, '-DpomFile=' + pathToThriftMavenCompilerPluginPom
+}
+
+task extractThriftCompiler(type: MavenExec) {
+    goals 'generate-sources'
+}
+
+task cleanThriftCompiler(type: MavenExec) {
+    goals 'clean'
+}
+
+task cleanGeneratedSources(type: Delete) {
+    delete generatedSourcesPath
+    delete 'out'
+    followSymlinks = true
+}
+
+extractThriftCompiler.dependsOn installThriftMavenCompilerPluginToLocalRepo
+setThriftCompilerFilepermission.dependsOn extractThriftCompiler
+
+compileThrift
+{
+    dependsOn installThriftMavenCompilerPluginToLocalRepo, extractThriftCompiler, setThriftCompilerFilepermission
+}
+
+compileJava
+{
+    dependsOn compileThrift
+}
+
+clean{
+    dependsOn cleanThriftCompiler,cleanGeneratedSources
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}
