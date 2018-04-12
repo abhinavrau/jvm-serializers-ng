@@ -54,9 +54,9 @@
                             <useJvmChmod>true</useJvmChmod>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.github.ccascone</groupId>
+                                    <groupId>com.github.abhinavrau</groupId>
                                     <artifactId>mvn-thrift-compiler</artifactId>
-                                    <version>1.0_0.9.3</version>
+                                    <version>1.2_0.9.3</version>
                                     <type>jar</type>
                                     <includes>thrift-${os.detected.classifier}.exe</includes>
                                     <outputDirectory>${project.build.directory}/thrift-compiler</outputDirectory>
