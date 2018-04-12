@@ -31,7 +31,7 @@
                             <target>java_pojo</target>
                             <namespace>serializers.dslplatform</namespace>
                             <dsl>${project.basedir}/src/main/dsl</dsl>
-                            <generatedSources>${project.build.directory}/generated-sources</generatedSources>
+                            <generatedSources>${project.basedir}/src/main/generated-sources</generatedSources>
                             <options>
                                 <option>manual-json</option>
                             </options>
@@ -45,7 +45,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>${project.build.directory}/generated-sources/</directory>
+                            <directory>${project.basedir}/src/main/generated-sources</directory>
                             <includes>
                                 <include>**/*</include>
                             </includes>

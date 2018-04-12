@@ -8,12 +8,12 @@ List of things to TODO for this project
 
 ### Build related
 
-* Figure out why debugging JUnit test cases does not work
+* Done - Figure out why debugging JUnit test cases does not work
 
-* dslplatform requires Mono framework to generate code. Put flag to
-enbale/disable code generation
+* Done - dslplatform requires Mono framework to generate code. Detect
+Mono framework to enbale code generation
 
-* Generated code that needs to checked in should
+* Done - dslplatform only needs this - Generated code that needs to checked in should
 not be in the target or build directories
 
 * Standardize generated-code directory paths

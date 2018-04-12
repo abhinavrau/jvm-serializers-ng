@@ -5,6 +5,8 @@ apply plugin: "java"
 apply plugin: "com.github.dkorotych.gradle-maven-exec"
 apply plugin: "idea"
 
+
+
 // Earlier versions of Gradle
 buildscript {
     repositories {
@@ -31,31 +33,61 @@ dependencies {
     testCompile project (path: ':core', configuration: 'testArchives')
 }
 
+project.ext.generatedSourcesDir = 'src/main/generated-sources'
+project.ext.monoInstalled = false
+
 sourceSets {
     main
             {
                 java {
-                    srcDirs = ['src/main/java','target/generated-sources']
+                    srcDirs = ['src/main/java',generatedSourcesDir]
                 }
 
             }
 }
+
 idea {
     module {
         // Marks the already(!) added srcDir as "generated"
-        generatedSourceDirs += file('target/generated-sources')
+        generatedSourceDirs += file(generatedSourcesDir)
+    }
+}
+
+project.ext.checkMonoExists = { ->
+
+    Object result = exec{
+        def command = "command -v mono"
+        ignoreExitValue = true
+        executable "bash" args "-l", "-c", command
+    }
+    if(result.getExitValue()==0){
+        println "Has Mono"
+        return true
+    }else{
+        print "No Mono"
+        return false
     }
 }
 
 
+
 task generateDSL(type: MavenExec) {
-    goals 'generate-sources'
+    if(checkMonoExists) {
+        goals 'generate-sources'
+    }
+    else {
+        goals 'initialize'
+    }
 }
 
 task cleanDSL(type: MavenExec) {
-    goals 'clean'
+    if(checkMonoExists) {
+        goals 'clean'
+    }
+    else {
+        goals 'initialize'
+    }
 }
-
 
 compileJava{
     dependsOn generateDSL
@@ -64,6 +96,8 @@ compileJava{
 clean{
     dependsOn cleanDSL
 }
+
+
 
 tasks.withType(Test) {
     testLogging {
