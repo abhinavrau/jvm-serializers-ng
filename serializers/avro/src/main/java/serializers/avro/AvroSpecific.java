@@ -58,7 +58,7 @@ public class AvroSpecific
 		}
 
 		public byte[] serialize(T content) throws Exception {
-                  ByteArrayOutputStream out = outputStream(content);
+                  ByteArrayOutputStream out = outputStream();
                   encoder = ENCODER_FACTORY.binaryEncoder(out, encoder);
                   WRITER.write(content, encoder);
                   encoder.flush();

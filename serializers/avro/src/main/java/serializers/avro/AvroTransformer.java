@@ -3,9 +3,7 @@ package serializers.avro;
 import data.media.MediaTransformer;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.generic.GenericData;
-import serializers.avro.media.Image;
-import serializers.avro.media.Media;
-import serializers.avro.media.MediaContent;
+import serializers.avro.media.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +26,7 @@ public class AvroTransformer extends MediaTransformer<MediaContent>
 
     public MediaContent forward(data.media.MediaContent mc)
     {
-        GenericArray<Image> images = new GenericData.Array<Image>(mc.images.size(), Avro.Media.sImages);
+        GenericArray<Image> images = new GenericData.Array<>(mc.images.size(), Avro.Media.sImages);
         for (data.media.Image image : mc.images) {
             images.add(forwardImage(image));
         }
@@ -65,11 +63,11 @@ public class AvroTransformer extends MediaTransformer<MediaContent>
             return m;
     }
 
-    public int forwardPlayer(data.media.Media.Player p)
+    public player forwardPlayer(data.media.Media.Player p)
     {
             switch (p) {
-                    case JAVA: return 1;
-                    case FLASH: return 2;
+                    case JAVA: return player.JAVA;
+                    case FLASH: return player.FLASH;
                     default: throw new AssertionError("invalid case: " + p);
             }
     }
@@ -85,11 +83,11 @@ public class AvroTransformer extends MediaTransformer<MediaContent>
             return i;
     }
 
-    public int forwardSize(data.media.Image.Size s)
+    public size forwardSize(data.media.Image.Size s)
     {
             switch (s) {
-                    case SMALL: return 1;
-                    case LARGE: return 2;
+                    case SMALL: return size.SMALL;
+                    case LARGE: return size.LARGE;
                     default: throw new AssertionError("invalid case: " + s);
             }
     }
@@ -132,11 +130,11 @@ public class AvroTransformer extends MediaTransformer<MediaContent>
             );
     }
 
-    public data.media.Media.Player reversePlayer(int p)
+    public data.media.Media.Player reversePlayer(player p)
     {
         switch (p) {
-        case 1: return data.media.Media.Player.JAVA;
-        case 2: return data.media.Media.Player.FLASH;
+        case JAVA: return data.media.Media.Player.JAVA;
+            case FLASH: return data.media.Media.Player.FLASH;
         default: throw new AssertionError("invalid case: " + p);
         }
     }
@@ -151,11 +149,11 @@ public class AvroTransformer extends MediaTransformer<MediaContent>
                 reverseSize(image.getSize()));
     }
 
-    public data.media.Image.Size reverseSize(int s)
+    public data.media.Image.Size reverseSize(size s)
     {
         switch (s) {
-        case 1: return data.media.Image.Size.SMALL;
-        case 2: return data.media.Image.Size.LARGE;
+            case SMALL: return data.media.Image.Size.SMALL;
+            case LARGE: return data.media.Image.Size.LARGE;
         default: throw new AssertionError("invalid case: " + s);
         }
     }

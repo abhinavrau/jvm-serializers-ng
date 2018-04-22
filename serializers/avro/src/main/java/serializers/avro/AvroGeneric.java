@@ -3,16 +3,15 @@ package serializers.avro;
 import data.media.*;
 
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.*;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.BinaryDecoder;
 
 import serializers.*;
+import serializers.avro.media.player;
+import serializers.avro.media.size;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,6 +32,7 @@ public class AvroGeneric
                 )
         );
 	}
+
 
 	// ------------------------------------------------------------
 	// Serializer (just one class)
@@ -66,7 +66,7 @@ public class AvroGeneric
 
 		public byte[] serialize(GenericRecord data) throws IOException
 		{
-                  ByteArrayOutputStream out = outputStream(data);
+                  ByteArrayOutputStream out = outputStream();
                   encoder = ENCODER_FACTORY.binaryEncoder(out, encoder);
                   WRITER.write(data, encoder);
                   encoder.flush();
@@ -77,20 +77,16 @@ public class AvroGeneric
 	// ------------------------------------------------------------
 	// MediaTransformer
 
-	public static final Schema sMediaContent = serializers.avro.media.MediaContent.SCHEMA$;
 
 	public static final Transformer<MediaContent,GenericRecord> MediaTransformer = new MediaTransformer<GenericRecord>()
 	{
-		@SuppressWarnings("unused")
-		private final Schema sImage = serializers.avro.media.Image.SCHEMA$;
-		private final Schema sMedia = serializers.avro.media.Media.SCHEMA$;
 
-                @SuppressWarnings("unused")
-		private final Schema sImages = sMediaContent.getField("images").schema();
-                @SuppressWarnings("unused")
-		private final Schema sPersons = sMedia.getField("persons").schema();
+		private final Schema sPlayer = serializers.avro.media.player.SCHEMA$;
+		private final Schema sSize = serializers.avro.media.size.SCHEMA$;
 
-                public GenericRecord[] resultArray(int size) {
+		private  final Schema sMediaContent = serializers.avro.media.MediaContent.SCHEMA$;
+
+		public GenericRecord[] resultArray(int size) {
                     return new GenericRecord[size];
                 }
                 
@@ -103,7 +99,7 @@ public class AvroGeneric
 
 			content.put("media", forwardMedia(mc.media));
 
-			GenericData.Array<GenericRecord> images = new GenericData.Array<GenericRecord>(mc.images.size(), Avro.Media.sImages);
+			GenericData.Array<GenericRecord> images = new GenericData.Array<>(mc.images.size(), Avro.Media.sImages);
 			for (Image image : mc.images) {
 				images.add(forwardImage(image));
 			}
@@ -125,7 +121,7 @@ public class AvroGeneric
 				m.put("bitrate", media.bitrate);
 			}
 
-			GenericData.Array<CharSequence> persons =  new GenericData.Array<CharSequence>(media.persons.size(), Avro.Media.sPersons);
+			GenericData.Array<CharSequence> persons =  new GenericData.Array<>(media.persons.size(), Avro.Media.sPersons);
 			for (String p : media.persons) {
                           persons.add(p);
 			}
@@ -142,11 +138,11 @@ public class AvroGeneric
 			return m;
 		}
 
-		public int forwardPlayer(Media.Player p)
+		public GenericEnumSymbol forwardPlayer(Media.Player p)
 		{
 			switch (p) {
-				case JAVA: return 1;
-				case FLASH: return 2;
+				case JAVA: return new GenericData.EnumSymbol(sPlayer, "JAVA");
+				case FLASH: return new GenericData.EnumSymbol(sSize, "FLASH");
 				default:
 					throw new AssertionError("invalid case: " + p);
 			}
@@ -165,11 +161,11 @@ public class AvroGeneric
 			return i;
 		}
 
-		public int forwardSize(Image.Size s)
+		public GenericEnumSymbol forwardSize(Image.Size s)
 		{
 			switch (s) {
-				case SMALL: return 1;
-				case LARGE: return 2;
+				case SMALL: return new GenericData.EnumSymbol(sSize, "SMALL");
+				case LARGE: return new GenericData.EnumSymbol(sSize, "LARGE");
 				default:
 					throw new AssertionError("invalid case: " + s);
 			}
@@ -217,16 +213,16 @@ public class AvroGeneric
 				bitrate != null ? bitrate : 0,
 				bitrate != null,
 				persons,
-				reversePlayer((Integer) media.get("player")),
+				reversePlayer((GenericEnumSymbol)media.get("player")),
 				copyright != null ? copyright.toString() : null
 			);
 		}
 
-		public Media.Player reversePlayer(int p)
+		public Media.Player reversePlayer(GenericEnumSymbol p)
 		{
-			switch (p) {
-				case 1: return Media.Player.JAVA;
-				case 2: return Media.Player.FLASH;
+			switch (p.toString()) {
+				case "JAVA": return Media.Player.JAVA;
+				case "FLASH": return Media.Player.FLASH;
 				default: throw new AssertionError("invalid case: " + p);
 			}
 		}
@@ -239,14 +235,14 @@ public class AvroGeneric
 				title == null ? null : title.toString(),
 				(Integer) image.get("width"),
 				(Integer) image.get("height"),
-				reverseSize((Integer) image.get("size")));
+				reverseSize((GenericEnumSymbol)image.get("size")));
 		}
 
-		public Image.Size reverseSize(int s)
+		public Image.Size reverseSize(GenericEnumSymbol s)
 		{
-			switch (s) {
-				case 1: return Image.Size.SMALL;
-				case 2: return Image.Size.LARGE;
+			switch (s.toString()) {
+				case "SMALL": return Image.Size.SMALL;
+				case "LARGE": return Image.Size.LARGE;
 				default: throw new AssertionError("invalid case: " + s);
 			}
 		}

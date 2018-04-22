@@ -6,10 +6,18 @@
         {"name": "title", "type": ["null", "string"]},
         {"name": "width", "type": "int"},
         {"name": "height", "type": "int"},
-        {"name": "size", "type": "int"}
+        {"name": "size",
+         "type": {
+            "name": "size",
+             "type": "enum",
+             "symbols" : ["SMALL", "LARGE"]
+         }
+
+        }
       ]
     }
   }},
+
   {"name": "media", 
     "type": {"type": "record", "name": "Media",
       "fields": [
@@ -22,7 +30,13 @@
         {"name": "size", "type": "long"},
         {"name": "bitrate", "type": ["null", "int"]},
         {"name": "persons", "type": {"type": "array", "items": "string"}},
-        {"name": "player", "type": "int"},
+        {"name": "player",
+         "type": {
+         "name": "player",
+          "type": "enum",
+          "symbols"  : ["JAVA", "FLASH"]
+          }
+         },
         {"name": "copyright", "type": ["null", "string"]}
       ]
     }
