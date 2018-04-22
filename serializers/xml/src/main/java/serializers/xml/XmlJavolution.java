@@ -63,7 +63,7 @@ public class XmlJavolution
           @Override
 		public byte[] serialize(T content) throws Exception
 		{
-			ByteArrayOutputStream baos = outputStream(content);
+			ByteArrayOutputStream baos = outputStream();
 			XMLObjectWriter writer = XMLObjectWriter.newInstance(baos).setBinding(binding);
 			writer.write(content, ROOT_ELEMENT, clazz);
 			writer.close();

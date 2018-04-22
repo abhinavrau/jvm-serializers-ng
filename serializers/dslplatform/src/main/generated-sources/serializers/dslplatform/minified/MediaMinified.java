@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v2.0.6676.31522 
+* v2.1.6683.33143 
 */
 
 package serializers.dslplatform.minified;
@@ -133,7 +133,7 @@ public final class MediaMinified   implements java.lang.Cloneable, java.io.Seria
 	public String toString() {
 		return "MediaMinified(" + uri + ',' + title + ',' + width + ',' + height + ',' + format + ',' + duration + ',' + size + ',' + bitrate + ',' + persons + ',' + player + ',' + copyright + ')';
 	}
-	private static final long serialVersionUID = 4942779662440592478L;
+	private static final long serialVersionUID = -7513901596239444560L;
 	
 	private String uri;
 

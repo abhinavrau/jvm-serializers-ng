@@ -6,22 +6,22 @@ List of things to TODO for this project
 
 ## InBox
 
-### Build related
 
-* Done - Figure out why debugging JUnit test cases does not work
+## Project Mission Statement
 
-* Done - dslplatform requires Mono framework to generate code. Detect
-Mono framework to enbale code generation
+* Help users compare open source serialization libraries based on the following:
 
-* Done - dslplatform only needs this - Generated code that needs to checked in should
-not be in the target or build directories
+  * Serialization Format
+    * Text based (XML - 12, JSON - 31)
+    * Binary (Avro, ProtoBuf) - 32
+    *  Binary Multi Langauge support - 15
+  *  Zero knowledge -35 vs. POJOs with CodeGen - 19 vs. Manual Serialization - 36
+  *  Object Graph Cyclic references support - 15 vs. Flat Tree - 70
+  *  Backward/Forward compatibility
 
-* Standardize generated-code directory paths
 
-* Have a simple way to enable/disable projects not needed
 
-* flatbuffers only works on osx and linux. Fix it for windows by using
- .zip file in pom.xml
+
 
 * Integrate asserts and reflection based comparison of objects when
 testing correctness
@@ -31,13 +31,21 @@ adjusted for the way it handles null stirngs.Figure out a way a way to
 handle that. Maybe using reflection based comparison would help.
 
 
-### Enhancements
+### MVP
 
-* Integrate JMH framework
-    ** Learn from https://github.com/fabienrenaud/java-json-benchmark
+1. Move to Gradle - Done
+2. Use latest version of libraries - Done
+3. JUnit tests for verification - Done
+4. Use ReflectionAssert
+4. Use JMH for performance measurement
+  * Learn from https://github.com/fabienrenaud/java-json-benchmark
+5. Use CLI framework to run code
+6. Better visualization of results
 
-* Better visualization of results
+* flatbuffers only works on osx and linux. Fix it for windows by using
+ .zip file in pom.xml
 
+## SomeDay/Maybe
 * How to run it using web page and see results in real time?
 
 * Specify own schema
@@ -45,11 +53,10 @@ handle that. Maybe using reflection based comparison would help.
 * Organize by type (schemaless vs. schema), language support, format of
 framework
 
-
-## SomeDay/Maybe
-
 * Integrate JSON benchmark
 https://github.com/fabienrenaud/java-json-benchmark project somehow.
+
+
 
 
 

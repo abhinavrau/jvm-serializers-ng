@@ -10,6 +10,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
+import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 
 import data.media.Image;
@@ -48,7 +49,7 @@ public class XmlXStream
 			new com.thoughtworks.xstream.XStream(new XppDriver() {
 				public HierarchicalStreamWriter createWriter(Writer out) {
 					//return new PrettyPrintWriter(out, xmlFriendlyReplacer());
-					return new CompactWriter(out, xmlFriendlyReplacer());
+					return new CompactWriter(out, new XmlFriendlyNameCoder());
 				}
 			}), MediaConfiguration),
                 new SerFeatures(
@@ -118,7 +119,7 @@ public class XmlXStream
 
 		public byte[] serialize(T content) throws IOException
 		{
-			ByteArrayOutputStream baos = outputStream(content);
+			ByteArrayOutputStream baos = outputStream();
 			xstream.toXML(content, baos);
 			return baos.toByteArray();
 		}

@@ -34,6 +34,9 @@ dependencies {
     compile 'com.fasterxml:aalto-xml:1.0.0'
 
     compile 'cc.plural:jsonij:0.2.7'
+    compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
+
+    testCompile group: 'org.unitils', name: 'unitils-core', version: '3.4.6'
 
 }
 

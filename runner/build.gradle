@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':serializers')
+    compile project(':serializers').getSubprojects()
     compile project(':core')
 
     testCompile group: 'junit', name: 'junit', version: '4.11'

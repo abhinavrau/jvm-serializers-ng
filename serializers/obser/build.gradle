@@ -1,0 +1,28 @@
+group 'com.github.jvm-serializers-ng'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+
+repositories {
+    mavenCentral()
+    flatDir
+    {
+        dirs 'lib'
+    }
+}
+
+dependencies {
+    compile project(':core')
+    compile name: 'obser-0.9.0-SNAPSHOT'
+    testCompile project (path: ':core', configuration: 'testArchives')
+
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}

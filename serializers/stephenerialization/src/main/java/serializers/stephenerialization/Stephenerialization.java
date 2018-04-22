@@ -1,4 +1,4 @@
-package serializers;
+package serializers.stephenerialization;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,14 +10,15 @@ import java.util.List;
 
 import data.media.MediaTransformer;
 
-import serializers.stephenerialization.Image;
-import serializers.stephenerialization.Media;
-import serializers.stephenerialization.MediaContent;
+import serializers.*;
+
 
 public class Stephenerialization {
     public static void register(TestGroups groups)
     {
-        groups.media.add(mediaTransformer, new StephenerializationSerializer<MediaContent>("stephenerialization"), new SerFeatures(SerFormat.BINARY, SerGraph.FULL_GRAPH, SerClass.ZERO_KNOWLEDGE));
+        groups.media.add(mediaTransformer,
+                new StephenerializationSerializer<MediaContent>("stephenerialization"),
+                new SerFeatures(SerFormat.BINARY, SerGraph.FULL_GRAPH, SerClass.ZERO_KNOWLEDGE));
     }
 
     // ------------------------------------------------------------
@@ -41,7 +42,7 @@ public class Stephenerialization {
 
         public byte[] serialize(T data) throws IOException
         {
-            ByteArrayOutputStream baos = outputStream(data);
+            ByteArrayOutputStream baos = outputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(data);
             return baos.toByteArray();

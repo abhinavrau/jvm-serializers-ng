@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v2.0.6676.31522 
+* v2.1.6683.33143 
 */
 
 package serializers.dslplatform.full;
@@ -133,7 +133,7 @@ public final class MediaFull   implements java.lang.Cloneable, java.io.Serializa
 	public String toString() {
 		return "MediaFull(" + uri + ',' + title + ',' + width + ',' + height + ',' + format + ',' + duration + ',' + size + ',' + bitrate + ',' + persons + ',' + player + ',' + copyright + ')';
 	}
-	private static final long serialVersionUID = 3821267069129907010L;
+	private static final long serialVersionUID = 2515068011626447252L;
 	
 	private String uri;
 

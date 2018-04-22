@@ -44,7 +44,7 @@ public class Jaxb<T> extends Serializer<T>
     @Override
     public byte[] serialize(T data) throws IOException
     {
-        ByteArrayOutputStream baos = outputStream(data);
+        ByteArrayOutputStream baos = outputStream();
         try {
             jaxbContext.createMarshaller().marshal(data, baos);
         } catch (Exception e) {

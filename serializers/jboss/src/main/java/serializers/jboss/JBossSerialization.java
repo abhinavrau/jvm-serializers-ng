@@ -57,7 +57,7 @@ public class JBossSerialization {
 
 	    @Override
 		public byte[] serialize(final T data) throws IOException {
-	        ByteArrayOutputStream baos = outputStream(data);
+	        ByteArrayOutputStream baos = outputStream();
 	        JBossObjectOutputStream joos = new JBossObjectOutputStream(
         		baos,
         		new StringUtilBuffer(BUFFER_SIZE, BUFFER_SIZE)

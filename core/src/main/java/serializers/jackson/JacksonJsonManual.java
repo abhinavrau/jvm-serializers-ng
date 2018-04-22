@@ -62,7 +62,7 @@ public class JacksonJsonManual extends BaseJacksonDriver<MediaContent>
     @Override
     public final byte[] serialize(MediaContent content) throws IOException
     {
-        ByteArrayOutputStream baos = outputStream(content);
+        ByteArrayOutputStream baos = outputStream();
         JsonGenerator generator = constructGenerator(baos);
         writeMediaContent(generator, content);
         generator.close();

@@ -1,0 +1,24 @@
+group 'com.github.jvm-serializers-ng'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':core')
+    compile 'de.ruedigermoeller:fst:2.57'
+    testCompile project (path: ':core', configuration: 'testArchives')
+
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+}

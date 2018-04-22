@@ -1,0 +1,41 @@
+group 'com.github.jvm-'
+version '1.0-SNAPSHOT'
+
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    compile project('avro')
+    compile project('capnproto')
+    compile project('colfer')
+    compile project('datakernel')
+    compile project('dslplatform')
+    compile project('flatbuffers')
+    compile project('fst')
+    compile project('hessian')
+    compile project('jackson')
+    compile project('javaxjson')
+    compile project('jboss')
+    compile project('json')
+    compile project('kryo')
+    compile project('mongodb')
+    compile project('msgpack')
+    compile project('obser')
+    compile project('protobuf')
+    compile project('protostuff')
+    compile project('scala')
+    compile project('stephenerialization')
+    compile project('thrift')
+    compile project('wobly')
+    compile project('xml')
+
+}
+
+
+
+

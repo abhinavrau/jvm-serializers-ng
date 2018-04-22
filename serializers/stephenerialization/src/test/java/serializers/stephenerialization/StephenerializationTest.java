@@ -2,7 +2,6 @@ package serializers.stephenerialization;
 
 import org.junit.Test;
 import serializers.CorrectnessCheckHelper;
-import serializers.Stephenerialization;
 import serializers.TestGroups;
 
 

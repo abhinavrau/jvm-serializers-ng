@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v2.0.6676.31522 
+* v2.1.6683.33143 
 */
 
 package serializers.dslplatform.full;
@@ -93,7 +93,7 @@ public final class ImageFull   implements java.lang.Cloneable, java.io.Serializa
 	public String toString() {
 		return "ImageFull(" + uri + ',' + title + ',' + width + ',' + height + ',' + size + ')';
 	}
-	private static final long serialVersionUID = 8866364169930859557L;
+	private static final long serialVersionUID = 3278365103323933635L;
 	
 	private String uri;
 

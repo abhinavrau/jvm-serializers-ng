@@ -52,7 +52,7 @@ public abstract class BaseStaxMediaSerializer extends Serializer<MediaContent>
     @Override
     public byte[] serialize(MediaContent content) throws Exception
     {
-        ByteArrayOutputStream baos = outputStream(content);
+        ByteArrayOutputStream baos = outputStream();
         XMLStreamWriter writer = createWriter(baos);
         _serializer.writeDocument(writer, content);
         writer.flush();

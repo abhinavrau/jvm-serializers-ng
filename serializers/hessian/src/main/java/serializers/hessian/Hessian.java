@@ -44,7 +44,7 @@ public class Hessian
 
 	    public byte[] serialize(T data) throws IOException
 	    {
-	        ByteArrayOutputStream out = outputStream(data);
+	        ByteArrayOutputStream out = outputStream();
 	        Hessian2StreamingOutput hout = new Hessian2StreamingOutput(out);
 	        hout.writeObject(data);
 	        return out.toByteArray();

@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v2.0.6676.31522 
+* v2.1.6683.33143 
 */
 
 package serializers.dslplatform.minified;
@@ -93,7 +93,7 @@ public final class ImageMinified   implements java.lang.Cloneable, java.io.Seria
 	public String toString() {
 		return "ImageMinified(" + uri + ',' + title + ',' + width + ',' + height + ',' + size + ')';
 	}
-	private static final long serialVersionUID = 4372112578953362141L;
+	private static final long serialVersionUID = -185361515943550101L;
 	
 	private String uri;
 

@@ -24,7 +24,7 @@ public abstract class JavaxJsonTree extends Serializer<JsonStructure> {
 
     @Override
     public byte[] serialize(JsonStructure content) throws Exception {
-    	ByteArrayOutputStream outputStream = outputStream(content);
+    	ByteArrayOutputStream outputStream = outputStream();
     	JsonWriter writer = json.createWriter(outputStream);
     	writer.write(content);
     	writer.close();

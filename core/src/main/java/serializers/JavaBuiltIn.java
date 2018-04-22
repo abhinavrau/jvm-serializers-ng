@@ -66,7 +66,7 @@ public class JavaBuiltIn
 
 		public byte[] serialize(T data) throws IOException
 		{
-			ByteArrayOutputStream baos = outputStream(data);
+			ByteArrayOutputStream baos = outputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
             if ( unshared ) {
                 oos.writeUnshared(data);

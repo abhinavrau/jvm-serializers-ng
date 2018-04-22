@@ -56,7 +56,7 @@ public class JaxbAalto<T> extends Serializer<T>
     @Override
     public byte[] serialize(T data) throws IOException
     {
-        ByteArrayOutputStream baos = outputStream(data);
+        ByteArrayOutputStream baos = outputStream();
         try {
             XMLStreamWriter sw = outputFactory.createXMLStreamWriter(baos, "UTF-8");
             jaxbContext.createMarshaller().marshal(data, sw);
