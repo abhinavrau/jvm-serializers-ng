@@ -2,22 +2,37 @@ group 'com.github.jvm-serializers-ng'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
-
+apply plugin: 'maven-publish'
 
 repositories {
-    mavenCentral()
-    flatDir
-    {
-        dirs 'lib'
-    }
+    mavenLocal()
+
 }
 
 dependencies {
     compile project(':core')
-    compile name: 'obser-0.9.0-SNAPSHOT'
+    compile "obser:obser:0.9.0-SNAPSHOT"
     testCompile project (path: ':core', configuration: 'testArchives')
 
 }
+
+publishing {
+    publications {
+        jarFileOne(MavenPublication) {
+            groupId 'obser'
+            artifactId 'obser'
+            version '0.9.0-SNAPSHOT'
+            artifact file('lib/obser-0.9.0-SNAPSHOT.jar')
+        }
+
+    }
+}
+
+compileJava
+{
+    dependsOn publishToMavenLocal
+}
+
 
 tasks.withType(Test) {
     testLogging {

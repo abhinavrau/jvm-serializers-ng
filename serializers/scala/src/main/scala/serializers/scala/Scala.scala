@@ -1,4 +1,4 @@
-package serializers
+package serializers.scala
 
 import _root_.java.util.ArrayList
 import _root_.scala.collection.JavaConversions._
@@ -6,6 +6,8 @@ import _root_.scala.collection.JavaConversions._
 import _root_.sbinary.Operations
 import _root_.sbinary.{Format, Input, Output, DefaultProtocol}
 
+import serializers.scala.media.{Image, Media, MediaContent}
+import serializers.{JavaBuiltIn, Serializer, TestGroups}
 import _root_.serializers.{scala => sdata}
 
 object Scala
@@ -107,7 +109,6 @@ object Scala
 
 	object MediaSerializer extends Serializer[sdata.media.MediaContent]
 	{
-		import sdata.media._
 
 		def getName = "scala/sbinary"
 		def serialize(content: MediaContent) = Operations.toByteArray[MediaContent](content)(MediaProtocol.MediaContentFormat)
@@ -116,7 +117,6 @@ object Scala
 
 	object MediaProtocol extends DefaultProtocol
 	{
-		import sdata.media._
 		import Operations.{read, write}
 
 		implicit object MediaContentFormat extends Format[MediaContent]

@@ -40,7 +40,7 @@ public class BenchmarkExporter extends BenchmarkRunner {
         runBenchmark(new String[0]);
     }
     
-    protected void runBenchmark(String[] args)
+    public void runBenchmark(String[] args)
     {
         TestGroups groups = new TestGroups();
         addTests(groups);

@@ -2,7 +2,6 @@ package serializers.scala;
 
 import org.junit.Test;
 import serializers.CorrectnessCheckHelper;
-import serializers.Scala;
 import serializers.TestGroups;
 
 

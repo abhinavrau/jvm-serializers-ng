@@ -5,7 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
 import serializers.avro.AvroSpecific;
+import serializers.fst.FastSerialization;
+import serializers.hessian.Hessian;
 import serializers.jackson.*;
+import serializers.jboss.JBossMarshalling;
+import serializers.jboss.JBossSerialization;
 import serializers.kryo.Kryo;
 import serializers.protobuf.Protobuf;
 import serializers.xml.XmlStax;
@@ -28,7 +32,7 @@ public class MediaStreamBenchmark extends BenchmarkBase
     }
     
     @Override
-    protected void addTests(TestGroups groups)
+    public void addTests(TestGroups groups)
     {        
         // Binary Formats; language-specific ones
         JavaManual.register(groups);
@@ -40,7 +44,7 @@ public class MediaStreamBenchmark extends BenchmarkBase
 
         // Binary formats, generic: protobuf, thrift, avro, CKS, msgpack
         Protobuf.register(groups);
-        Thrift.register(groups);
+        serializers.Thrift.register(groups);
         AvroSpecific.register(groups);
  
         // JSON

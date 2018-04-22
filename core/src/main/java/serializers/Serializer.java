@@ -41,4 +41,16 @@ public abstract class Serializer<S>
  	}
 
 
+	@SuppressWarnings("resource")
+	public final byte[] serializeAsBytes(S[] items) throws Exception {
+		ByteArrayOutputStream bytes = outputStreamForList(items);
+		serializeItems(items, bytes);
+		return bytes.toByteArray();
+	}
+
+	// And then bit bigger default when serializing a list or array
+	public ByteArrayOutputStream outputStreamForList (S[] items) {
+		return new ByteArrayOutputStream(BUFFER_SIZE * items.length);
+	}
+
 }

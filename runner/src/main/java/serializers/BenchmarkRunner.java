@@ -2,22 +2,29 @@ package serializers;
 
 import serializers.avro.AvroGeneric;
 import serializers.avro.AvroSpecific;
-import serializers.colfer.CapNProto;
+import serializers.capnproto.CapNProto;
 import serializers.colfer.Colfer;
 import serializers.datakernel.DataKernelSerializer;
+import serializers.dslplatform.DSLPlatform;
 import serializers.flatbuffers.FlatBuffers;
+import serializers.fst.FastSerialization;
+import serializers.hessian.Hessian;
 import serializers.jackson.*;
-import serializers.javaxjson.*;
+import serializers.javaxjson.JavaxJsonStreamGlassfish;
+import serializers.javaxjson.JavaxJsonTreeGlassfish;
+import serializers.jboss.JBossMarshalling;
+import serializers.jboss.JBossSerialization;
 import serializers.json.*;
 import serializers.kryo.Kryo;
-import serializers.scala.MsgPack;
+import serializers.mongodb.MongoDB;
 import serializers.protobuf.Protobuf;
 import serializers.protobuf.ProtobufJson;
 import serializers.protostuff.Protostuff;
 import serializers.protostuff.ProtostuffJson;
+import serializers.scala.MsgPack;
+import serializers.stephenerialization.Stephenerialization;
 import serializers.wobly.Wobly;
 import serializers.xml.*;
-import serializers.dslplatform.DSLPlatform;
 
 /**
  * Full test of various codecs, using a single <code>MediaItem</code>
@@ -30,7 +37,7 @@ public class BenchmarkRunner extends MediaItemBenchmark
     }
 
     @Override
-    protected void addTests(TestGroups groups)
+    public void addTests(TestGroups groups)
     {
         // Binary Formats; language-specific ones
         JavaBuiltIn.register(groups);
@@ -54,7 +61,7 @@ public class BenchmarkRunner extends MediaItemBenchmark
         // its lazy deserialization isn't comparable to other serializers.
         // ActiveMQProtobuf.register(groups);
         Protostuff.register(groups);
-        Thrift.register(groups);
+        serializers.Thrift.register(groups);
         AvroSpecific.register(groups);
         AvroGeneric.register(groups);
         // 01-Oct-2014: MsgPack implementation uses questionable technique as well: instead of using Maps (name/value),
@@ -72,7 +79,7 @@ public class BenchmarkRunner extends MediaItemBenchmark
 //        JacksonJsonTree.register(groups);
         JavaxJsonTreeGlassfish.register(groups);
         JavaxJsonStreamGlassfish.register(groups);
-        JsonTwoLattes.register(groups);
+
         ProtostuffJson.register(groups);
 
         ProtobufJson.register(groups);

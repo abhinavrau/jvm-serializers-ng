@@ -2,21 +2,34 @@ group 'com.github.jvm-serializers'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
-
+apply plugin: 'maven-publish'
 
 repositories {
-    mavenCentral()
-    flatDir
-    {
-        dirs 'lib'
-    }
+    mavenLocal()
 }
 
 dependencies {
     compile project(':core')
-    compile name: 'wobly-core-1.0'
+    compile "wobly:wobly-core:1.0"
     testCompile project (path: ':core', configuration: 'testArchives')
 
+}
+
+publishing {
+    publications {
+        jarFileOne(MavenPublication) {
+            groupId 'wobly'
+            artifactId 'wobly-core'
+            version '1.0'
+            artifact file('lib/wobly-core-1.0.jar')
+        }
+
+    }
+}
+
+compileJava
+{
+    dependsOn publishToMavenLocal
 }
 
 tasks.withType(Test) {
