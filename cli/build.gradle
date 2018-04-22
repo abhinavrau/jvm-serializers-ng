@@ -1,0 +1,14 @@
+group 'com.github.jvm-serializers-ng'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'info.picocli:picocli:3.0.0-beta-2'
+}
