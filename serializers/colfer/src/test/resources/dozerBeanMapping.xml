@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozermapper.github.io/schema/bean-mapping"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://dozermapper.github.io/schema/bean-mapping http://dozermapper.github.io/schema/bean-mapping.xsd">
+    <mapping>
+        <class-a>data.media.MediaContent</class-a>
+        <class-b>serializers.colfer.media.MediaContent</class-b>
+        <field-exclude>
+            <a>size</a>
+            <b>size</b>
+        </field-exclude>
+        <field-exclude>
+            <a>player</a>
+            <b>player</b>
+        </field-exclude>
+    </mapping>
+
+</mappings>

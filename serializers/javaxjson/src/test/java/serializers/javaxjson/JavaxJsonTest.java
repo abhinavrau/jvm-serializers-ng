@@ -14,7 +14,8 @@ public class JavaxJsonTest extends CorrectnessCheckHelper {
 	{
 		TestGroups groups = new TestGroups();
 		JavaxJsonStreamGlassfish.register(groups);
-		//JavaxJsonTreeGlassfish.register(groups);
+
+		// TODO: Fix this: JavaxJsonTreeGlassfish.register(groups);
 
 
 

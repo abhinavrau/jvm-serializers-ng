@@ -6,8 +6,8 @@ import java.util.Map;
 
 public final class TestGroup<J>
 {
-	public final Map<String,Entry<J,Object>> entries = new LinkedHashMap<String,Entry<J,Object>>();
-    public final Map<String,Entry<J,Object>> extensionHandlers = new HashMap<String,Entry<J,Object>>();
+	public final Map<String,Entry<J,Object>> entries = new LinkedHashMap<>();
+    public final Map<String,Entry<J,Object>> extensionHandlers = new HashMap<>();
 
     public <S> void add(Transformer<J,S> transformer, Serializer<S> serializer)
     {

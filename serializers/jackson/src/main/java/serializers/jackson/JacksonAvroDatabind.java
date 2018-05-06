@@ -18,7 +18,7 @@ public class JacksonAvroDatabind
     public static void register(TestGroups groups)
     {
         ObjectMapper mapper = new ObjectMapper(new AvroFactory());
-        mapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX);
+        //mapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX);
         JavaType type = mapper.constructType(MediaContent.class);
         AvroSchema schema = new AvroSchema(Avro.Media.sMediaContent);
         ObjectReader reader =  mapper.readerFor(type).with(schema);

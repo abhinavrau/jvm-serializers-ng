@@ -1,7 +1,10 @@
 package serializers;
 
+import org.apache.commons.compress.utils.IOUtils;
+
 import java.io.*;
 import java.net.URLEncoder;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
@@ -253,14 +256,16 @@ abstract class BenchmarkBase
 
     private void validateDataFile(Params params) {
         // And then let's verify input data file bit more...
-        File dataFile = new File(params.dataFileName);
-        if (!dataFile.exists()) {
-            System.err.println("Couldn't find data file \"" + dataFile.getPath() + "\"");
+        InputStream dataFile = this.getClass().getClassLoader().getResourceAsStream(params.dataFileName);
+        if (dataFile ==null) {
+            System.err.println("Couldn't find data file \"" + params.dataFileName + "\"");
             System.exit(1);
         }
-        String[] parts = dataFile.getName().split("\\.");
+        String[] filePaths = params.dataFileName.split("\\/");
+        String filename = filePaths[filePaths.length-1];
+        String[] parts = filename.split("\\.");
         if (parts.length < 3) {
-            System.err.println("Data file \"" + dataFile.getName() + "\" should be of the form \"<type>.<name>.<extension>\"");
+            System.err.println("Data file \"" + params.dataFileName + "\" should be of the form \"<type>.<name>.<extension>\"");
             System.exit(1);
         }
         params.dataType = parts[0];
@@ -356,7 +361,7 @@ abstract class BenchmarkBase
         }
         byte[] fileBytes;
         try {
-            fileBytes = readFile(new File(params.dataFileName)); // Load entire file into a byte array.
+            fileBytes = IOUtils.toByteArray(this.getClass().getClassLoader().getResourceAsStream(params.dataFileName)); // Load entire file into a byte array.
         }
         catch (Exception ex) {
             System.err.println("Error loading data from file \"" + params.dataFileName + "\".");
@@ -746,23 +751,7 @@ abstract class BenchmarkBase
         }
     }
     
-    protected static byte[] readFile(File file) throws IOException
-    {
-            FileInputStream fin = new FileInputStream(file);
-            try {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-                    byte[] data = new byte[1024];
-                    while (true) {
-                            int numBytes = fin.read(data);
-                            if (numBytes < 0) break;
-                            baos.write(data, 0, numBytes);
-                    }
-                    return baos.toByteArray();
-            }
-            finally {
-                    fin.close();
-            }
-    }
+
 
     protected static byte[] compressDeflate(byte[] data)
     {

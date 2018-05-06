@@ -10,7 +10,7 @@ import serializers.jackson.JacksonJsonManual;
 
 public final class TestGroups
 {
-	public final TestGroup<data.media.MediaContent> media = new TestGroup<data.media.MediaContent>();
+	public final TestGroup<data.media.MediaContent> media = new TestGroup<>();
     {
         media.addExtensionHandler(
             "json",
@@ -18,7 +18,7 @@ public final class TestGroups
             new JacksonJsonManual("", (JsonFactory) new JsonFactory().enable(JsonParser.Feature.ALLOW_COMMENTS)));
     }
 
-	public final Map<String,TestGroup<?>> groupMap = new HashMap<String,TestGroup<?>>();
+	public final Map<String,TestGroup<?>> groupMap = new HashMap<>();
 
 	{
 		groupMap.put("media", media);

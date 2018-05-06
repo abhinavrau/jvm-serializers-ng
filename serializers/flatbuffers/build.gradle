@@ -35,12 +35,12 @@ dependencies {
 
 sourceSets {
     main
-            {
-                java {
-                    srcDirs = ['src/main/java','src/main/generated-sources']
-                }
+    {
+        java {
+            srcDirs = ['src/main/java','src/main/generated-sources']
+        }
 
-            }
+    }
 }
 
 flatbuffers {

@@ -14,6 +14,7 @@ public class ProtobufTest extends CorrectnessCheckHelper {
 	{
 		TestGroups groups = new TestGroups();
 		Protobuf.register(groups);
+		ProtobufJson.register(groups);
 		runCorrectness(groups);
 	}
 }

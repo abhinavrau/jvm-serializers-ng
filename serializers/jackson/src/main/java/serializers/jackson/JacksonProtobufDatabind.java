@@ -18,9 +18,10 @@ public class JacksonProtobufDatabind
         ProtobufMapper mapper = new ProtobufMapper();
         ProtobufSchema schema;
         try {
-            schema = new ProtobufSchemaLoader().load(new File("schema/media.proto.jackson"),
+            schema = new ProtobufSchemaLoader().load(JacksonProtobufDatabind.class.getClassLoader()
+                            .getResourceAsStream("schema/media.proto.jackson"),
                     "MediaContent");
-                    //"schema/media.proto.jackson"));
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

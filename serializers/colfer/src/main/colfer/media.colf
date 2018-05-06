@@ -10,8 +10,12 @@ type image struct {
 	title  text
 	width  int32
 	height int32
-	small  bool
-	large  bool
+	size   size
+}
+
+type size struct {
+    small  bool
+    large  bool
 }
 
 type media struct {
@@ -26,6 +30,10 @@ type media struct {
 	copyright  text
 	bitrate    int32
 	hasBitrate bool
-	flashPlay  bool
-	javaPlay   bool
+	player     player
+}
+
+type player struct {
+     flash bool
+     java  bool
 }

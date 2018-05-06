@@ -1,21 +1,15 @@
 package serializers.colfer;
 
+import data.media.MediaTransformer;
+import serializers.*;
+import serializers.colfer.media.Player;
+import serializers.colfer.media.Size;
+
 import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import data.media.*;
-import serializers.SerClass;
-import serializers.SerFeatures;
-import serializers.SerFormat;
-import serializers.SerGraph;
-import serializers.Serializer;
-import serializers.TestGroups;
-import serializers.colfer.media.Image;
-import serializers.colfer.media.Media;
-import serializers.colfer.media.MediaContent;
 
 
 public class Colfer {
@@ -31,20 +25,20 @@ public class Colfer {
 		);
 	}
 
-	static final class ColferSerializer extends Serializer<MediaContent> {
+	static final class ColferSerializer extends Serializer<serializers.colfer.media.MediaContent> {
 
 		private byte[] buffer = new byte[1024];
 
 
 		@Override
-		public MediaContent deserialize(byte[] array) throws Exception {
-			MediaContent mc = new MediaContent();
+		public serializers.colfer.media.MediaContent deserialize(byte[] array) throws Exception {
+			serializers.colfer.media.MediaContent mc = new serializers.colfer.media.MediaContent();
 			mc.unmarshal(array, 0);
 			return mc;
 		}
 
 		@Override
-		public byte[] serialize(MediaContent content) {
+		public byte[] serialize(serializers.colfer.media.MediaContent content) {
 			while (true) {
 				try {
 					int n = content.marshal(buffer, 0);
@@ -61,44 +55,44 @@ public class Colfer {
 
 	}
 
-	static final class Transformer extends MediaTransformer<MediaContent> {
+	static final class Transformer extends MediaTransformer<serializers.colfer.media.MediaContent> {
 
 		@Override
-		public MediaContent[] resultArray(int size) {
-			return new MediaContent[size];
+		public serializers.colfer.media.MediaContent[] resultArray(int size) {
+			return new serializers.colfer.media.MediaContent[size];
 		}
 
 		@Override
-		public data.media.MediaContent shallowReverse(MediaContent mc) {
+		public data.media.MediaContent shallowReverse(serializers.colfer.media.MediaContent mc) {
 			return new data.media.MediaContent(reverseMedia(mc.getMedia()), Collections.<data.media.Image>emptyList());
 		}
 
 		@Override
-		public MediaContent forward(data.media.MediaContent src) {
+		public serializers.colfer.media.MediaContent forward(data.media.MediaContent src) {
 			int i = src.images.size();
-			Image[] images = new Image[i];
+			serializers.colfer.media.Image[] images = new serializers.colfer.media.Image[i];
 			while (--i >= 0) {
 				images[i] = forwardImage(src.images.get(i));
 			}
 
-			MediaContent dst = new MediaContent();
+			serializers.colfer.media.MediaContent dst = new serializers.colfer.media.MediaContent();
 			dst.images = images;
 			dst.media = forwardMedia(src.media);
 			return dst;
 		}
 
 		@Override
-		public data.media.MediaContent reverse(MediaContent src) {
+		public data.media.MediaContent reverse(serializers.colfer.media.MediaContent src) {
 			List<data.media.Image> images = new ArrayList<>(src.images.length);
-			for (Image image : src.images) {
+			for (serializers.colfer.media.Image image : src.images) {
 				images.add(reverseImage(image));
 			}
 
 			return new data.media.MediaContent(reverseMedia(src.media), images);
 		}
 
-		private static Media forwardMedia(data.media.Media src) {
-			Media dst = new Media();
+		private static serializers.colfer.media.Media forwardMedia(data.media.Media src) {
+			serializers.colfer.media.Media dst = new serializers.colfer.media.Media();
 			dst.uri = (src.uri != null ? src.uri:"");
 			dst.title = (src.title !=null ? src.title:"");
 			dst.width = src.width;
@@ -109,12 +103,13 @@ public class Colfer {
 			dst.bitrate = src.bitrate;
 			dst.hasBitrate = src.hasBitrate;
 			dst.persons = src.persons.toArray(dst.persons);
+			dst.player = new Player();
 			switch (src.player) {
 				case FLASH:
-					dst.flashPlay = true;
+					dst.player.flash = true;
 					break;
 				case JAVA:
-					dst.javaPlay = true;
+					dst.player.java = true;
 					break;
 			}
 			if (src.copyright != null)
@@ -122,7 +117,7 @@ public class Colfer {
 			return dst;
 		}
 
-		private static data.media.Media reverseMedia(Media src) {
+		private static data.media.Media reverseMedia(serializers.colfer.media.Media src) {
 			data.media.Media dst = new data.media.Media();
 			dst.uri = src.uri;
 			dst.title = src.title;
@@ -134,10 +129,10 @@ public class Colfer {
 			dst.bitrate = src.bitrate;
 			dst.hasBitrate = src.hasBitrate;
 			dst.persons = Arrays.asList(src.persons);
-			if (src.flashPlay) {
+			if (src.player.flash) {
 				dst.player = data.media.Media.Player.FLASH;
 			}
-			if (src.javaPlay) {
+			if (src.player.java) {
 				dst.player = data.media.Media.Player.JAVA;
 			}
 			if (src.copyright.length() != 0) {
@@ -146,33 +141,34 @@ public class Colfer {
 			return dst;
 		}
 
-		private static Image forwardImage(data.media.Image src) {
-			Image dst = new Image();
+		private static serializers.colfer.media.Image forwardImage(data.media.Image src) {
+			serializers.colfer.media.Image dst = new serializers.colfer.media.Image();
 			dst.uri = (src.uri != null ? src.uri:"");
 			dst.title = (src.title !=null ? src.title:"");
 			dst.width = src.width;
 			dst.height = src.height;
+			dst.size = new Size();
 			switch (src.size) {
 				case SMALL:
-					dst.small = true;
+					dst.size.small = true;
 					break;
 				case LARGE:
-					dst.large = true;
+					dst.size.large = true;
 					break;
 			}
 			return dst;
 		}
 
-		private static data.media.Image reverseImage(Image src) {
+		private static data.media.Image reverseImage(serializers.colfer.media.Image src) {
 			data.media.Image dst = new data.media.Image();
 			dst.uri = src.uri;
 			dst.title = src.title;
 			dst.width = src.width;
 			dst.height = src.height;
-			if (src.small) {
+			if (src.size.small) {
 				dst.size = data.media.Image.Size.SMALL;
 			}
-			if (src.large) {
+			if (src.size.large) {
 				dst.size = data.media.Image.Size.LARGE;
 			}
 			return dst;
