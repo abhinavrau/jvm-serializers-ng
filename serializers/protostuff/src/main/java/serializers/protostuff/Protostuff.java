@@ -1,100 +1,94 @@
 package serializers.protostuff;
 
-import java.io.IOException;
+import data.media.MediaTransformer;
+import io.protostuff.*;
+import io.protostuff.runtime.RuntimeSchema;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+import serializers.protostuff.media.Image;
+import serializers.protostuff.media.Media;
+import serializers.protostuff.media.MediaContent;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.protostuff.GraphIOUtil;
-import io.protostuff.Input;
-import io.protostuff.LinkedBuffer;
-import io.protostuff.Output;
-import io.protostuff.ProtobufIOUtil;
-import io.protostuff.ProtostuffIOUtil;
-import io.protostuff.Schema;
-import io.protostuff.runtime.RuntimeSchema;
-
-import data.media.MediaTransformer;
-
-import serializers.*;
-import serializers.protostuff.media.MediaContent;
-import serializers.protostuff.media.Media;
-import serializers.protostuff.media.Image;
+import static serializers.core.metadata.SerializerProperties.APIStyle.BUILD_TIME_CODE_GENERATION;
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.*;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 public final class Protostuff
 {
     
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder
+                .format(BINARY)
+                .mode(SCHEMA_FIRST)
+                .apiStyle(BUILD_TIME_CODE_GENERATION)
+                .valueType(POJO)
+                .feature(JSON_CONVERTER)
+                .feature(XML_CONVERTER)
+                .feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+                .name("protostuff")
+                .projectURL("https://protostuff.github.io/docs/")
+                .build();
         // generated code
-        groups.media.add(mediaTransformer, ProtostuffMediaSerializer,
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FLAT_TREE,
-                        SerClass.CLASSES_KNOWN,
-                        "generated code"
-                )
-        );
+        groups.media.add(mediaTransformer, new ProtostuffMediaSerializer(properties));
 
+        SerializerProperties handCoded_properties = properties.toBuilder()
+                .feature(OPTIMIZED)
+                .optimizedDescription("hand-coded schema + no autoboxing")
+                .build();
         // manual (hand-coded schema, no autoboxing)
-        groups.media.add(JavaBuiltIn.mediaTransformer, ProtostuffManualMediaSerializer,
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FLAT_TREE,
-                        SerClass.MANUAL_OPT,
-                        "manual"
-                )
-        );
+        groups.media.add(JavaBuiltIn.mediaTransformer,
+                new ProtostuffManualMediaSerializer(handCoded_properties));
 
+        SerializerProperties reflection_properties = properties.toBuilder()
+                .mode(CODE_FIRST)
+                .apiStyle(REFLECTION)
+                .build();
         // runtime (reflection)
-        groups.media.add(JavaBuiltIn.mediaTransformer, ProtostuffRuntimeMediaSerializer,
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FLAT_TREE,
-                        SerClass.ZERO_KNOWLEDGE,
-                        "reflection"
-                )
-        );
-        
+        groups.media.add(JavaBuiltIn.mediaTransformer,
+                new ProtostuffRuntimeMediaSerializer(reflection_properties));
+
+
+        SerializerProperties protobuf_properties = properties.toBuilder()
+                .feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+                .name("protobuf")
+                .relatedSerializer("protostuff")
+                .build();
         // protobuf serialization + generated code
-        groups.media.add(mediaTransformer, ProtobufMediaSerializer,
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.CLASSES_KNOWN,
-                        "protobuf + generated code"
-                )
-        );
-        
+        groups.media.add(mediaTransformer, new ProtobufMediaSerializer(protobuf_properties));
+
+        SerializerProperties protobuf_reflection_properties = protobuf_properties.toBuilder()
+                .apiStyle(REFLECTION)
+                .build();
         // protobuf serialization + runtime
-        groups.media.add(JavaBuiltIn.mediaTransformer, ProtobufRuntimeMediaSerializer,
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.ZERO_KNOWLEDGE,
-                        "protobuf + reflection"
-                )
-        );
-        
+        groups.media.add(JavaBuiltIn.mediaTransformer,
+                new ProtobufRuntimeMediaSerializer(protobuf_reflection_properties));
+
+        SerializerProperties graph_properties = properties.toBuilder()
+                .feature(SUPPORTS_CYCLIC_REFERENCES)
+                .build();
         // graph
-        groups.media.add(mediaTransformer, ProtostuffGraphMediaSerializer, 
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.CLASSES_KNOWN,
-                        "graph + generated code"
-                )
-        );
-        
-        groups.media.add(JavaBuiltIn.mediaTransformer, ProtostuffGraphRuntimeMediaSerializer, 
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.ZERO_KNOWLEDGE,
-                        "graph + reflection"
-                )
-        );
+        groups.media.add(mediaTransformer, new ProtostuffGraphMediaSerializer(graph_properties));
+
+
+        SerializerProperties graph_reflection_properties = graph_properties.toBuilder()
+                .apiStyle(REFLECTION)
+                .build();
+        // graph + reflection
+        groups.media.add(JavaBuiltIn.mediaTransformer,
+                new ProtostuffGraphRuntimeMediaSerializer(graph_reflection_properties));
         
         // exclude protostuff-graph-manual
         /*groups.media.add(JavaBuiltIn.mediaTransformer, ProtostuffGraphManualMediaSerializer,
@@ -107,14 +101,17 @@ public final class Protostuff
         );*/
     }
     
-    public static final Serializer<MediaContent> ProtostuffMediaSerializer = 
-        new Serializer<MediaContent>()
+    public static class ProtostuffMediaSerializer extends Serializer<MediaContent>
     {
+        public ProtostuffMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
         final LinkedBuffer buffer = LinkedBuffer.allocate(BUFFER_SIZE);
 
         public MediaContent deserialize(byte[] array) throws Exception
         {
-            final MediaContent mc = MediaContent.getDefaultInstance();
+            final MediaContent mc = MediaContent.newBuilder().build();
             ProtostuffIOUtil.mergeFrom(array, mc, mc.cachedSchema());
             return mc;
         }
@@ -130,22 +127,22 @@ public final class Protostuff
                 buffer.clear();
             }
         }
-        
-        public String getName()
-        {
-            return "protostuff";
-        }
+
         
     };
 
-    public static final Serializer<MediaContent> ProtobufMediaSerializer = 
-        new Serializer<MediaContent>()
+    public static class ProtobufMediaSerializer extends Serializer<MediaContent>
     {
+        ProtobufMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
+
         final LinkedBuffer buffer = LinkedBuffer.allocate(BUFFER_SIZE);
 
         public MediaContent deserialize(byte[] array) throws Exception
         {
-            final MediaContent mc = MediaContent.getDefaultInstance();
+            final MediaContent mc = MediaContent.newBuilder().build();
             ProtobufIOUtil.mergeFrom(array, mc, mc.cachedSchema());
             return mc;
         }
@@ -162,16 +159,15 @@ public final class Protostuff
             }
         }
         
-        public String getName()
-        {
-            return "protobuf/protostuff";
-        }
-        
     };
 
-    public static final Serializer<data.media.MediaContent> ProtostuffRuntimeMediaSerializer = 
-        new Serializer<data.media.MediaContent>()
+    public static class ProtostuffRuntimeMediaSerializer extends Serializer<data.media.MediaContent>
     {
+        ProtostuffRuntimeMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
+
 
 	    final Schema<data.media.MediaContent> schema = RuntimeSchema.getSchema(data.media.MediaContent.class);
         final LinkedBuffer buffer = LinkedBuffer.allocate(BUFFER_SIZE);
@@ -194,17 +190,16 @@ public final class Protostuff
                 buffer.clear();
             }
         }
-        
-        public String getName()
-        {
-            return "protostuff-runtime";
-        }
+
         
     };
 
-    public static final Serializer<data.media.MediaContent> ProtobufRuntimeMediaSerializer = 
-        new Serializer<data.media.MediaContent>()
+    public static class  ProtobufRuntimeMediaSerializer extends Serializer<data.media.MediaContent>
     {
+        ProtobufRuntimeMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
 
 	    final Schema<data.media.MediaContent> schema = RuntimeSchema.getSchema(data.media.MediaContent.class);
         final LinkedBuffer buffer = LinkedBuffer.allocate(BUFFER_SIZE);
@@ -227,17 +222,16 @@ public final class Protostuff
                 buffer.clear();
             }
         }
-        
-        public String getName()
-        {
-            return "protobuf/protostuff-runtime";
-        }
-        
+
     };
 
-    public static final Serializer<data.media.MediaContent> ProtostuffManualMediaSerializer = 
-        new Serializer<data.media.MediaContent>()
+    public static class ProtostuffManualMediaSerializer extends  Serializer<data.media.MediaContent>
     {
+        ProtostuffManualMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
+
         final LinkedBuffer buffer = LinkedBuffer.allocate(BUFFER_SIZE);
 
         public data.media.MediaContent deserialize(byte[] array) throws Exception
@@ -259,21 +253,20 @@ public final class Protostuff
             }
         }
         
-        public String getName()
-        {
-            return "protostuff-manual";
-        }
-        
     };
     
-    public static final Serializer<MediaContent> ProtostuffGraphMediaSerializer = 
-            new Serializer<MediaContent>()
+    public static class ProtostuffGraphMediaSerializer extends Serializer<MediaContent>
     {
+        ProtostuffGraphMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
+
         final LinkedBuffer buffer = LinkedBuffer.allocate(BUFFER_SIZE);
 
         public MediaContent deserialize(byte[] array) throws Exception
         {
-            final MediaContent mc = MediaContent.getDefaultInstance();
+            final MediaContent mc = MediaContent.newBuilder().build();
             GraphIOUtil.mergeFrom(array, mc, mc.cachedSchema());
             return mc;
         }
@@ -289,16 +282,16 @@ public final class Protostuff
                 buffer.clear();
             }
         }
-        
-        public String getName()
-        {
-            return "protostuff-graph";
-        }
+
     };
 
-    public static final Serializer<data.media.MediaContent> ProtostuffGraphManualMediaSerializer = 
-        new Serializer<data.media.MediaContent>()
+    public class ProtostuffGraphManualMediaSerializer extends  Serializer<data.media.MediaContent>
     {
+        ProtostuffGraphManualMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
+
         final LinkedBuffer buffer = LinkedBuffer.allocate(BUFFER_SIZE);
 
         public data.media.MediaContent deserialize(byte[] array) throws Exception
@@ -319,17 +312,16 @@ public final class Protostuff
                 buffer.clear();
             }
         }
-        
-        public String getName()
-        {
-            return "protostuff-graph-manual";
-        }
-        
+
     };
 
-    public static final Serializer<data.media.MediaContent> ProtostuffGraphRuntimeMediaSerializer = 
-        new Serializer<data.media.MediaContent>()
+    public static class ProtostuffGraphRuntimeMediaSerializer extends Serializer<data.media.MediaContent>
     {
+        ProtostuffGraphRuntimeMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
+
         final LinkedBuffer buffer = LinkedBuffer.allocate(BUFFER_SIZE);
         final Schema<data.media.MediaContent> schema = RuntimeSchema.getSchema(data.media.MediaContent.class);
 
@@ -351,13 +343,8 @@ public final class Protostuff
                 buffer.clear();
             }
         }
-        
-        public String getName()
-        {
-            return "protostuff-graph-runtime";
-        }
-        
-    };
+
+    }
 
     static final Schema<data.media.MediaContent> MEDIA_CONTENT_SCHEMA = new Schema<data.media.MediaContent>()
     {
@@ -721,7 +708,7 @@ public final class Protostuff
             private Media forwardMedia(data.media.Media media)
             {
                     // Media
-                    return Media.newBuilder()
+                    Media.Builder builder =  Media.newBuilder()
                             .setUri(media.uri)
                             .setWidth(media.width)
                             .setHeight(media.height)
@@ -729,10 +716,18 @@ public final class Protostuff
                             .setDuration(media.duration)
                             .setSize(media.size)
                             .setPlayer(forwardPlayer(media.player))
-                        .setTitle(media.title)
-                        .setBitrate(media.hasBitrate ? media.bitrate : null)
-                        .addAllPerson(media.persons)
-                        .setCopyright(media.copyright).build();
+                        .setBitrate(media.bitrate)
+                        .addAllPerson(media.persons);
+
+                    if(media.title != null)
+                    {
+                        builder.setTitle(media.title);
+                    }
+                    if(media.copyright != null)
+                    {
+                        builder.setCopyright(media.copyright);
+                    }
+                    return builder.build();
             }
 
             public Media.Player forwardPlayer(data.media.Media.Player p)
@@ -747,12 +742,15 @@ public final class Protostuff
 
             private Image forwardImage(data.media.Image image)
             {
-                    return Image.newBuilder()
+                    Image.Builder builder =  Image.newBuilder()
                             .setUri(image.uri)
                             .setWidth(image.width)
                             .setHeight(image.height)
-                            .setSize(forwardSize(image.size))
-                        .setTitle(image.title).build();
+                            .setSize(forwardSize(image.size));
+                    if(image.title!=null) {
+                        builder.setTitle(image.title);
+                    }
+                    return builder.build();
             }
 
             public Image.Size forwardSize(data.media.Image.Size s)
@@ -771,7 +769,7 @@ public final class Protostuff
             public data.media.MediaContent reverse(MediaContent mc)
             {
                     List<Image> ims = mc.getImageList();
-                    List<data.media.Image> images = new ArrayList<data.media.Image>(ims.size());
+                    List<data.media.Image> images = new ArrayList<>(ims.size());
 
                     for (Image image : ims) {
                             images.add(reverseImage(image));

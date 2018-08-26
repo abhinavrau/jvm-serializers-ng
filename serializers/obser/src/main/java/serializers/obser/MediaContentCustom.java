@@ -1,4 +1,8 @@
-package data.media;
+package serializers.obser;
+
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

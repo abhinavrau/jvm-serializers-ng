@@ -1,33 +1,46 @@
 package serializers.avro;
 
+import org.apache.avro.io.BinaryDecoder;
+import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.avro.media.MediaContent;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.BinaryEncoder;
-import org.apache.avro.io.BinaryDecoder;
-import org.apache.avro.specific.SpecificDatumReader;
-import org.apache.avro.specific.SpecificDatumWriter;
-
-import serializers.*;
-import serializers.avro.media.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.BUILD_TIME_CODE_GENERATION;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
+import static serializers.core.metadata.SerializerProperties.Features.*;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
 
 public class AvroSpecific
 {
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
-        groups.media.add(new AvroTransformer(), new GenericSerializer<MediaContent>(MediaContent.class),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.UNKNOWN,
-                        SerClass.MANUAL_OPT,
-                        ""
-                )
-        );
+
+	    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+	    SerializerProperties properties = builder.format(BINARY)
+			    .apiStyle(BUILD_TIME_CODE_GENERATION)
+			    .mode(SCHEMA_FIRST)
+			    .valueType(POJO)
+			    .feature(EMBEDDED_SCHEMA)
+			    .feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+			    .feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+			    .name("avro")
+			    .projectURL("https://avro.apache.org/")
+			    .build();
+
+        groups.media.add(new AvroTransformer(), new GenericSerializer<MediaContent>(properties, MediaContent.class));
     }
 
     private static final DecoderFactory DECODER_FACTORY = DecoderFactory.get();
@@ -35,7 +48,7 @@ public class AvroSpecific
 
 	public static final class GenericSerializer<T> extends Serializer<T>
 	{
-		public String getName() { return "avro-specific"; }
+
 
 		private final SpecificDatumReader<T> READER;
 		private final SpecificDatumWriter<T> WRITER;
@@ -45,8 +58,9 @@ public class AvroSpecific
 
                 private final Class<T> clazz;
                 
-		public GenericSerializer(Class<T> clazz)
+		public GenericSerializer(SerializerProperties properties, Class<T> clazz)
 		{
+			super(properties);
 		    this.clazz = clazz;
 		    this.READER = new SpecificDatumReader<T>(clazz);
 		    this.WRITER = new SpecificDatumWriter<T>(clazz);

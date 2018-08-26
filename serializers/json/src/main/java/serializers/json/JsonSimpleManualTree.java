@@ -1,54 +1,56 @@
 package serializers.json;
 
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import serializers.JavaBuiltIn;
+import serializers.MediaContentTestGroup;
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import serializers.*;
-
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses JSON.simple [http://code.google.com/p/json-simple/], with manual tree parsing.
  */
 public class JsonSimpleManualTree
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(FIELD_BASED)
+            .mode(CODE_FIRST)
+            .valueType(NONE)
+            .name("json-simple")
+            .projectURL("http://code.google.com/p/json-simple")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new ManualTreeSerializer("json/json.simple/manual-tree"),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    "fst in unshared mode with preregistered classes"
-            )
-    );
+        new ManualTreeSerializer(properties));
 
   }
 
   static class ManualTreeSerializer extends Serializer<MediaContent>
   {
-    private final String name;
     private final JSONParser parser;
 
-    public ManualTreeSerializer(String name)
+    public ManualTreeSerializer(SerializerProperties properties)
     {
-      this.name = name;
+      super(properties);
       parser = new JSONParser();
-    }
-
-    public String getName()
-    {
-      return name;
     }
 
     public MediaContent deserialize(byte[] array) throws Exception
@@ -81,18 +83,17 @@ public class JsonSimpleManualTree
         media.hasBitrate = true;
       }
       media.copyright = (String) mediaJsonObject.get("copyright");
-      media.duration = ((Long) mediaJsonObject.get("duration")).longValue();
+      media.duration = (Long) mediaJsonObject.get("duration");
       media.format = (String) mediaJsonObject.get("format");
       media.height = ((Long) mediaJsonObject.get("height")).intValue();
       List<String> persons = new ArrayList<String>();
       JSONArray personsJsonArray = (JSONArray) mediaJsonObject.get("persons");
-      for (int i = 0, size = personsJsonArray.size(); i < size; i++)
-      {
-        persons.add((String) personsJsonArray.get(i));
+      for (Object aPersonsJsonArray : personsJsonArray) {
+        persons.add((String) aPersonsJsonArray);
       }
       media.persons = persons;
       media.player = Media.Player.valueOf((String) mediaJsonObject.get("player"));
-      media.size = ((Long) mediaJsonObject.get("size")).longValue();
+      media.size = (Long) mediaJsonObject.get("size");
       media.title = (String) mediaJsonObject.get("title");
       media.uri = (String) mediaJsonObject.get("uri");
       media.width = ((Long) mediaJsonObject.get("width")).intValue();
@@ -117,11 +118,11 @@ public class JsonSimpleManualTree
     static Image readImage(JSONParser parser, JSONObject imageJsonObject) throws Exception
     {
       Image image = new Image();
-      image.height = ((Long) imageJsonObject.get("height")).intValue();
+      image.height = (Integer) imageJsonObject.get("height");
       image.size = Image.Size.valueOf((String) imageJsonObject.get("size"));
       image.title = (String) imageJsonObject.get("title");
       image.uri = (String) imageJsonObject.get("uri");
-      image.width = ((Long) imageJsonObject.get("width")).intValue();
+      image.width = (Integer) imageJsonObject.get("width");
       return image;
     }
 
@@ -135,9 +136,8 @@ public class JsonSimpleManualTree
     {
       int size = imagesJsonArray.size();
       List<Image> images = new ArrayList<Image>(size);
-      for (int i = 0; i < size; i++)
-      {
-        images.add(readImage(parser, (JSONObject) imagesJsonArray.get(i)));
+      for (Object anImagesJsonArray : imagesJsonArray) {
+        images.add(readImage(parser, (JSONObject) anImagesJsonArray));
       }
       return images;
     }

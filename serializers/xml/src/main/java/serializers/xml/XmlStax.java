@@ -1,10 +1,17 @@
 package serializers.xml;
 
-import java.io.*;
+import serializers.JavaBuiltIn;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
 import javax.xml.stream.*;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import serializers.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Format.XML;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Codec that works with standard full Stax implementations, where
@@ -30,38 +37,42 @@ public class XmlStax
                 new com.sun.xml.fastinfoset.stax.factory.StAXOutputFactory()),
     };
     
-    public static void register(TestGroups groups, boolean woodstox, boolean aalto, boolean fastinfoset)
+    public static void register(MediaContentTestGroup groups, boolean woodstox, boolean aalto, boolean fastinfoset)
     {
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder()
+                .format(XML)
+                .mode(CODE_FIRST)
+                .apiStyle(FIELD_BASED)
+                .valueType(NONE)
+                .relatedSerializer("stax");
+
+
         if (woodstox) {
-            groups.media.add(JavaBuiltIn.mediaTransformer, new StaxMediaSerializer(HANDLERS[0]),
-                    new SerFeatures(
-                            SerFormat.XML,
-                            SerGraph.UNKNOWN,
-                            SerClass.MANUAL_OPT,
-                            ""
-                    )
-            );
+
+           SerializerProperties properties = builder
+                    .name("woodstox")
+                    .projectURL("https://github.com/FasterXML/woodstox")
+                    .build();
+
+            groups.media.add(JavaBuiltIn.mediaTransformer, new StaxMediaSerializer(properties, HANDLERS[0]));
 
         }
         if (aalto) {
-            groups.media.add(JavaBuiltIn.mediaTransformer, new StaxMediaSerializer(HANDLERS[1]),
-                    new SerFeatures(
-                            SerFormat.XML,
-                            SerGraph.UNKNOWN,
-                            SerClass.MANUAL_OPT,
-                            ""
-                    )
-            );
+
+            SerializerProperties properties = builder
+                    .name("aalto")
+                    .projectURL("https://github.com/FasterXML/aalto-xml")
+                    .build();
+
+            groups.media.add(JavaBuiltIn.mediaTransformer, new StaxMediaSerializer(properties, HANDLERS[1]));
         }
         if (fastinfoset) {
-            groups.media.add(JavaBuiltIn.mediaTransformer, new StaxMediaSerializer(HANDLERS[2]),
-                    new SerFeatures(
-                            SerFormat.XML,
-                            SerGraph.UNKNOWN,
-                            SerClass.MANUAL_OPT,
-                            ""
-                    )
-            );
+            SerializerProperties properties = builder
+                    .name("fastinfoset")
+                    .projectURL("https://github.com/pbielicki/fastinfoset-java")
+                    .build();
+
+            groups.media.add(JavaBuiltIn.mediaTransformer, new StaxMediaSerializer(properties, HANDLERS[2]));
         }
     }
 
@@ -90,15 +101,12 @@ public class XmlStax
     {
         private final Handler handler;
 
-        public StaxMediaSerializer(Handler handler)
+        public StaxMediaSerializer(SerializerProperties properties, Handler handler)
         {
             // yes, standard implementations better implement it correctly
-            super(true);
+            super(properties,false);
             this.handler = handler;
         }
-
-        @Override
-        public String getName() { return "xml/"+handler.name+"-manual"; }
 
         @Override
         protected XMLStreamReader createReader(InputStream in) throws XMLStreamException {

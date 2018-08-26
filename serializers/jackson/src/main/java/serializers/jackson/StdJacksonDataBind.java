@@ -1,25 +1,27 @@
 package serializers.jackson;
 
-import java.io.*;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public final class StdJacksonDataBind<T> extends BaseJacksonDataBind<T>
 {
-    public StdJacksonDataBind(String name, Class<T> clazz, ObjectMapper mapper) {
-        super(name, clazz, mapper);
+    public StdJacksonDataBind(SerializerProperties properties , Class<T> clazz, ObjectMapper mapper) {
+        super(properties, clazz, mapper);
     }
 
-    public StdJacksonDataBind(String name, JavaType type,
+    public StdJacksonDataBind(SerializerProperties properties , JavaType type,
             ObjectMapper mapper, ObjectReader reader, ObjectWriter writer)
     {
-        super(name, type, mapper, reader, writer);
+        super(properties, type, mapper, reader, writer);
     }
     
     @Override

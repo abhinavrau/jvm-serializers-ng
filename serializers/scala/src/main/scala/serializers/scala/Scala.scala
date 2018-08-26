@@ -1,21 +1,42 @@
 package serializers.scala
 
 import _root_.java.util.ArrayList
+
 import _root_.scala.collection.JavaConversions._
-
 import _root_.sbinary.Operations
-import _root_.sbinary.{Format, Input, Output, DefaultProtocol}
-
+import _root_.sbinary.{DefaultProtocol, Format, Input, Output}
 import serializers.scala.media.{Image, Media, MediaContent}
-import serializers.{JavaBuiltIn, Serializer, TestGroups}
+import serializers.{JavaBuiltIn, Serializer, MediaContentTestGroup}
 import _root_.serializers.{scala => sdata}
+import serializers.core.metadata.SerializerProperties
+import serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION
+import serializers.core.metadata.SerializerProperties.ValueType.POJO
+import serializers.core.metadata.SerializerProperties.Format.BINARY_JDK_COMPATIBLE
+import serializers.core.metadata.SerializerProperties.Format.BINARY
+import serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
 
 object Scala
 {
-	def register(groups: TestGroups)
+	val builder = SerializerProperties.builder
+	val properties = builder.format(BINARY_JDK_COMPATIBLE)
+		.apiStyle(REFLECTION)
+  	.mode(CODE_FIRST)
+		.valueType(POJO)
+		.name("scala")
+  	.projectURL("https://github.com/harrah/sbinary")
+		.build
+
+	val sbin_properties = properties.toBuilder
+  		.format(BINARY)
+  	.name("scala-sbinary")
+		.build
+
+	def register(groups: MediaContentTestGroup)
 	{
-		groups.media.add(MediaTransformer, new JavaBuiltIn.GenericSerializer[sdata.media.MediaContent]("scala/java-built-in"))
-		groups.media.add(MediaTransformer, MediaSerializer)
+
+		groups.media.add(MediaTransformer,
+			new JavaBuiltIn.GenericSerializer[sdata.media.MediaContent](properties, false))
+		groups.media.add(MediaTransformer, new MediaSerializer(sbin_properties))
 	}
 
 	// --------------------------------------------------------------------------
@@ -107,10 +128,9 @@ object Scala
 	// -------------------------------------------------------
 	// SBinary Serializers
 
-	object MediaSerializer extends Serializer[sdata.media.MediaContent]
+	class MediaSerializer(properties:SerializerProperties) extends Serializer[sdata.media.MediaContent](properties)
 	{
 
-		def getName = "scala/sbinary"
 		def serialize(content: MediaContent) = Operations.toByteArray[MediaContent](content)(MediaProtocol.MediaContentFormat)
 		def deserialize(array: Array[Byte]) = Operations.fromByteArray[MediaContent](array)(MediaProtocol.MediaContentFormat)
 	}

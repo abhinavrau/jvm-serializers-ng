@@ -13,28 +13,37 @@ import org.apache.thrift.protocol.TProtocolFactory;
 
 import data.media.MediaTransformer;
 
+import serializers.core.metadata.SerializerProperties;
 import serializers.thrift.media.*;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.BUILD_TIME_CODE_GENERATION;
+import static serializers.core.metadata.SerializerProperties.Features.OPTIMIZED;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 public class Thrift
 {
-	public static void register(TestGroups groups)
+	public static void register(MediaContentTestGroup groups)
 	{
-		groups.media.add(mediaTransformer, new MediaSerializer(ProtocolSpec.DefaultBinary),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.CLASSES_KNOWN,
-                        ""
-                )
-        );
-		groups.media.add(mediaTransformer, new MediaSerializer(ProtocolSpec.CompactBinary),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.CLASSES_KNOWN,
-                        ""
-                )
-        );
+		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+		SerializerProperties properties = builder
+				.format(BINARY)
+				.mode(SCHEMA_FIRST)
+				.apiStyle(BUILD_TIME_CODE_GENERATION)
+				.valueType(POJO)
+				.name("thrift")
+				.projectURL("https://thrift.apache.org/")
+				.build();
+
+		groups.media.add(mediaTransformer, new MediaSerializer(properties, ProtocolSpec.DefaultBinary));
+
+		SerializerProperties compact_properties = properties.toBuilder()
+				.feature(OPTIMIZED)
+				.optimizedDescription("compact")
+				.build();
+
+		groups.media.add(mediaTransformer, new MediaSerializer(compact_properties, ProtocolSpec.CompactBinary));
 	}
 
 	// ------------------------------------------------------------
@@ -59,8 +68,9 @@ public class Thrift
 	{
 		private final ProtocolSpec spec;
 
-		public MediaSerializer(ProtocolSpec spec)
+		public MediaSerializer(SerializerProperties properties, ProtocolSpec spec)
 		{
+			super(properties);
 			this.spec = spec;
 		}
 
@@ -76,41 +86,36 @@ public class Thrift
 			return new TSerializer(spec.factory).serialize(content);
 		}
 
-		public String getName()
-		{
-			return "thrift" + spec.suffix;
-		}
+        @Override
+        public final void serializeItems(MediaContent[] items, OutputStream out0) throws Exception
+        {
+            DataOutputStream out = new DataOutputStream(out0);
+            TSerializer ser = new TSerializer(spec.factory);
+            for (MediaContent item : items) {
+                byte[] data = ser.serialize(item);
+                out.writeInt(data.length);
+                out.write(data);
+            }
+            // should we write end marker (length of 0) or not? For now, omit it
+            out.flush();
+        }
 
-	        @Override
-	        public final void serializeItems(MediaContent[] items, OutputStream out0) throws Exception
-	        {
-	            DataOutputStream out = new DataOutputStream(out0);
-	            TSerializer ser = new TSerializer(spec.factory);
-	            for (MediaContent item : items) {
-	                byte[] data = ser.serialize(item);
-	                out.writeInt(data.length);
-	                out.write(data);
-	            }
-	            // should we write end marker (length of 0) or not? For now, omit it
-	            out.flush();
-	        }
-
-	        @Override
-	        public MediaContent[] deserializeItems(InputStream in0, int numberOfItems) throws Exception 
-	        {
-	            DataInputStream in = new DataInputStream(in0);
-	            TDeserializer deser = new TDeserializer(spec.factory);
-	            MediaContent[] result = new MediaContent[numberOfItems];
-	            for (int i = 0; i < numberOfItems; ++i) {
-	                int len = in.readInt();
-	                byte[] data = new byte[len];
-	                in.readFully(data);
-                        MediaContent content = new MediaContent();
-                        deser.deserialize(content, data);
-	                result[i] = content;
-	            }
-	            return result;
-	        }	
+        @Override
+        public MediaContent[] deserializeItems(InputStream in0, int numberOfItems) throws Exception
+        {
+            DataInputStream in = new DataInputStream(in0);
+            TDeserializer deser = new TDeserializer(spec.factory);
+            MediaContent[] result = new MediaContent[numberOfItems];
+            for (int i = 0; i < numberOfItems; ++i) {
+                int len = in.readInt();
+                byte[] data = new byte[len];
+                in.readFully(data);
+                    MediaContent content = new MediaContent();
+                    deser.deserialize(content, data);
+                result[i] = content;
+            }
+            return result;
+        }
 	}
 
 	// ------------------------------------------------------------

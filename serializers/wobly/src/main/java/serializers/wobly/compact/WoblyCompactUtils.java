@@ -1,15 +1,15 @@
 package serializers.wobly.compact;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
 import data.media.MediaTransformer;
-
 import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class WoblyCompactUtils {
 	public static WMedia forwardMedia(Media a) {
@@ -38,7 +38,8 @@ public class WoblyCompactUtils {
 		}
 		return images;
 	}	
-	
+
+
 	public static final class WoblyTransformer extends MediaTransformer<WMediaContent> {
                 @Override
                 public WMediaContent[] resultArray(int size) { return new WMediaContent[size]; }
@@ -58,8 +59,15 @@ public class WoblyCompactUtils {
 			return new MediaContent(reverseMedia(a.media), Collections.<Image>emptyList());
 		}
 	}
+
+	//compact
 	public static final class WoblySerializer extends Serializer<WMediaContent>
 	{
+		public WoblySerializer(SerializerProperties properties)
+		{
+			super(properties);
+		}
+
 		@Override
 		public WMediaContent deserialize(byte[] array)
 				throws Exception {
@@ -72,10 +80,6 @@ public class WoblyCompactUtils {
 			return content.toByteArray();
 		}
 
-		@Override
-		public String getName() {
-			return "wobly-compact";
-		}
 	}
 
 }

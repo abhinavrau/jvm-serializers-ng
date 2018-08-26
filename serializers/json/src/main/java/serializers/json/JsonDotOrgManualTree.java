@@ -1,49 +1,52 @@
 package serializers.json;
 
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONWriter;
-
-import serializers.*;
-
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses the json.org reference JSON implementation in Java, with semi-manual parsing.
  */
 public class JsonDotOrgManualTree
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(FIELD_BASED)
+            .mode(CODE_FIRST)
+            .valueType(NONE)
+            .name("json.org")
+            .projectURL("http://json.org/")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new ManualTreeSerializer("json/org.json/manual-tree"),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+        new ManualTreeSerializer(properties));
   }
 
   static class ManualTreeSerializer extends Serializer<MediaContent>
   {
-    private final String name;
 
-    public ManualTreeSerializer(String name)
-    {
-      this.name = name;
-    }
 
-    public String getName()
+    public ManualTreeSerializer(SerializerProperties properties)
     {
-      return name;
+      super(properties);
     }
 
     public MediaContent deserialize(byte[] array) throws Exception

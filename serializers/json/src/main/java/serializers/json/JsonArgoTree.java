@@ -1,30 +1,33 @@
 package serializers.json;
 
 
-import static argo.jdom.JsonNodeFactories.*;
-
-
-import static argo.jdom.JsonNodeType.NULL;
-import static java.lang.Integer.parseInt;
-import static java.lang.Long.parseLong;
-import static java.util.Arrays.asList;
+import argo.format.CompactJsonFormatter;
+import argo.format.JsonFormatter;
+import argo.jdom.JdomParser;
+import argo.jdom.JsonField;
+import argo.jdom.JsonNode;
+import argo.jdom.JsonStringNode;
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import argo.jdom.JsonStringNode;
-import serializers.*;
-
-import argo.format.CompactJsonFormatter;
-import argo.format.JsonFormatter;
-import argo.jdom.JdomParser;
-import argo.jdom.JsonField;
-import argo.jdom.JsonNode;
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
+import static argo.jdom.JsonNodeFactories.*;
+import static argo.jdom.JsonNodeType.NULL;
+import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
+import static java.util.Arrays.asList;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses Argo [http://argo.sourceforge.net], with manual tree processing.
@@ -33,31 +36,29 @@ import data.media.MediaContent;
  */
 public class JsonArgoTree
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(FIELD_BASED)
+            .mode(CODE_FIRST)
+            .valueType(NONE)
+            .name("argo")
+            .projectURL("http://argo.sourceforge.net")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new ManualTreeSerializer("json/argo/manual-tree"),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+        new ManualTreeSerializer(properties));
   }
 
   static class ManualTreeSerializer extends Serializer<MediaContent>
   {
-    private final String name;
 
-    public ManualTreeSerializer(String name)
-    {
-      this.name = name;
-    }
 
-    public String getName()
+    public ManualTreeSerializer(SerializerProperties properties)
     {
-      return name;
+      super(properties);
     }
 
     public MediaContent deserialize(byte[] array) throws Exception

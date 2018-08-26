@@ -1,18 +1,27 @@
 package serializers.json;
 
-import static data.media.FieldMapping.*;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import serializers.*;
-
-import com.google.gson.stream.*;
-
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import static data.media.FieldMapping.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses the new streaming parser of GSON, with fully
@@ -20,17 +29,20 @@ import data.media.MediaContent;
  */
 public class JsonGsonManual
 {
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
-            groups.media.add(JavaBuiltIn.mediaTransformer,
-                    new ManualSerializer("json/gson/manual"),
-                    new SerFeatures(
-                            SerFormat.JSON,
-                            SerGraph.FLAT_TREE,
-                            SerClass.MANUAL_OPT,
-                            ""
-                    )
-            );
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder
+                .format(SerializerProperties.Format.JSON)
+                .apiStyle(FIELD_BASED)
+                .mode(CODE_FIRST)
+                .valueType(NONE)
+                .name("gson")
+                .projectURL("https://github.com/google/gson")
+                .build();
+
+        groups.media.add(JavaBuiltIn.mediaTransformer,
+                    new ManualSerializer(properties));
     }
 
     // ------------------------------------------------------------
@@ -38,13 +50,11 @@ public class JsonGsonManual
 
     static class ManualSerializer extends Serializer<MediaContent>
     {
-        private final String name;
 
-        public ManualSerializer(String name) {
-            this.name = name;
+
+        public ManualSerializer(SerializerProperties properties) {
+            super(properties);
         }
-
-        public String getName() { return name; }
         
         public MediaContent deserialize(byte[] array) throws Exception
         {

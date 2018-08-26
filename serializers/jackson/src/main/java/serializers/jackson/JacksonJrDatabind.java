@@ -1,28 +1,37 @@
 package serializers.jackson;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.jr.ob.JSON;
+import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.jr.ob.JSON;
-
-import data.media.MediaContent;
-import serializers.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 public class JacksonJrDatabind
 {
-    public static void register(TestGroups groups) {
-        groups.media.add(JavaBuiltIn.mediaTransformer, new JrSerializer<MediaContent>(MediaContent.class),
-                new SerFeatures(
-                        SerFormat.JSON,
-                        SerGraph.FLAT_TREE,
-                        SerClass.ZERO_KNOWLEDGE,
-                        ""
-                )
-        );
+    public static void register(MediaContentTestGroup groups) {
+
+            SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+            SerializerProperties properties = builder.format(SerializerProperties.Format.JSON)
+                    .apiStyle(REFLECTION)
+                    .mode(CODE_FIRST)
+                    .valueType(POJO)
+                    .name("jacksonJr")
+                    .projectURL("https://github.com/FasterXML/jackson-jr")
+                    .build();
+
+        groups.media.add(JavaBuiltIn.mediaTransformer, new JrSerializer<MediaContent>(properties, MediaContent.class));
     }
 
     public final static class JrSerializer<T> extends Serializer<T>
@@ -30,14 +39,12 @@ public class JacksonJrDatabind
         private final Class<T> type;
         private final JSON json;
         
-        protected JrSerializer(Class<T> t)
+        protected JrSerializer(SerializerProperties properties , Class<T> t)
         {
+            super(properties);
             type = t;
             json = JSON.std;
         }
-
-        @Override
-        public String getName() { return "json/serializers.jackson-jr/databind"; }
 
         @Override
         public T deserialize(byte[] array) throws Exception {

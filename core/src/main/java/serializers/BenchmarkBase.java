@@ -4,7 +4,6 @@ import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.*;
 import java.net.URLEncoder;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
@@ -74,7 +73,7 @@ abstract class BenchmarkBase
     {
         Params params = new Params();
         findParameters(args, params);
-        TestGroups groups = new TestGroups();
+        MediaContentTestGroup groups = new MediaContentTestGroup();
         addTests(groups);
         runTests(groups, params,
                 testCreate,
@@ -85,7 +84,7 @@ abstract class BenchmarkBase
     /**
      * Method called to find add actual test codecs
      */
-    public abstract void addTests(TestGroups groups);
+    public abstract void addTests(MediaContentTestGroup groups);
     
     protected void findParameters(String[] args, Params params)
     {
@@ -273,7 +272,7 @@ abstract class BenchmarkBase
         params.dataExtension = parts[parts.length-1];
     }
 
-    public void checkForCorrectness(TestGroups groups, String dataFileName) throws Exception
+    public void checkForCorrectness(MediaContentTestGroup groups, String dataFileName) throws Exception
     {
         Params params = new Params();
         params.dataFileName = dataFileName;
@@ -298,10 +297,10 @@ abstract class BenchmarkBase
     /**
      * Method called to run individual test cases
      */
-    protected void runTests(TestGroups groups, Params params,
-            TestCase testCreate,
-            TestCase testSerialize, 
-            TestCase testDeserialize)
+    protected void runTests(MediaContentTestGroup groups, Params params,
+                            TestCase testCreate,
+                            TestCase testSerialize,
+                            TestCase testDeserialize)
     {
         TestGroup<?> bootstrapGroup = findGroupForTestData(groups, params);
         Object testData = loadTestData(bootstrapGroup, params);
@@ -336,9 +335,9 @@ abstract class BenchmarkBase
         }
     }
     
-    protected TestGroup<?> findGroupForTestData(TestGroups groups, Params params)
+    protected TestGroup<?> findGroupForTestData(MediaContentTestGroup groups, Params params)
     {
-        TestGroup<?> group = groups.groupMap.get(params.dataType);
+        TestGroup<?> group = null;
         if (group == null) {
             System.err.println("Data file \"" + params.dataFileName + "\" can't be loaded.");
             System.err.println("Don't know about data type \"" + params.dataType + "\"");
@@ -352,7 +351,7 @@ abstract class BenchmarkBase
 
     protected Object loadTestData(TestGroup<?> bootstrapGroup, Params params)
     {
-        TestGroup.Entry<?,Object> loader = bootstrapGroup.extensionHandlers.get(params.dataExtension);
+        TestGroup.Entry<?,Object> loader = null;
         if (loader == null) {
             System.err.println("Data file \"" + params.dataFileName + "\" can't be loaded.");
             System.err.println("No deserializer registered for data type \"" + params.dataType
@@ -381,8 +380,8 @@ abstract class BenchmarkBase
      * Method called to both load in test data and figure out which tests should
      * actually be run, from all available test cases.
      */
-    protected Iterable<TestGroup.Entry<Object,Object>> findApplicableTests(TestGroups groups, Params params,
-            TestGroup<?> bootstrapGroup)
+    protected Iterable<TestGroup.Entry<Object,Object>> findApplicableTests(MediaContentTestGroup groups, Params params,
+                                                                           TestGroup<?> bootstrapGroup)
     {
         @SuppressWarnings("unchecked")
         TestGroup<Object> group_ = (TestGroup<Object>) bootstrapGroup;

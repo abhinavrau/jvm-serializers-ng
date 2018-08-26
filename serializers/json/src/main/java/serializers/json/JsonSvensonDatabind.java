@@ -1,51 +1,53 @@
 package serializers.json;
 
-import java.io.*;
-
-import serializers.*;
-
 import data.media.Image;
 import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.IOException;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 /**
  * This serializer uses svenson for JSON data binding.
  */
 public class JsonSvensonDatabind
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+      SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+      SerializerProperties properties = builder
+              .format(SerializerProperties.Format.JSON)
+              .apiStyle(REFLECTION)
+              .mode(CODE_FIRST)
+              .valueType(POJO)
+              .name("svenson")
+              .projectURL("https://github.com/fforw/svenson")
+              .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new GenericSerializer<MediaContent>("json/svenson/databind", MediaContent.class),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+        new GenericSerializer<MediaContent>(properties, MediaContent.class));
   }
 
   static class GenericSerializer<T> extends Serializer<T>
   {
     private final org.svenson.JSONParser _jsonParser;
     private final org.svenson.JSON _jsonWriter;
-    private final String name;
     private final Class<T> type;
 
-    public GenericSerializer(String name, Class<T> clazz)
+    public GenericSerializer(SerializerProperties properties, Class<T> clazz)
     {
-        this.name = name;
+        super(properties);
         type = clazz;
       
         _jsonParser = org.svenson.JSONParser.defaultJSONParser();
         _jsonParser.addTypeHint(".images[]", Image.class);
         _jsonWriter = org.svenson.JSON.defaultJSON();
-    }
-
-    @Override
-    public String getName()
-    {
-        return name;
     }
 
     @Override

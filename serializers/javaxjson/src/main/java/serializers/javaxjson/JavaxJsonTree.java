@@ -1,19 +1,22 @@
 package serializers.javaxjson;
 
-import java.io.*;
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
 
-import javax.json.*;
-import javax.json.spi.*;
-
-import serializers.*;
+import javax.json.JsonStructure;
+import javax.json.JsonWriter;
+import javax.json.spi.JsonProvider;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 /**
  * Base class for javax.json benchmark using the tree model intermediate
  */
-public abstract class JavaxJsonTree extends Serializer<JsonStructure> {
+public  class JavaxJsonTree extends Serializer<JsonStructure> {
     private final JsonProvider json;
 
-    public JavaxJsonTree(JsonProvider json) {
+    public JavaxJsonTree(SerializerProperties properties, JsonProvider json) {
+    	super(properties);
         this.json = json;
     }
 

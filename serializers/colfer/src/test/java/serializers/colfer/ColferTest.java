@@ -1,21 +1,24 @@
 package serializers.colfer;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
-
-public class ColferTest extends CorrectnessCheckHelper {
+public class ColferTest  {
 
 
 	@Test
 	public void TestCorrectness() throws Exception
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
+		Validator<MediaContent, MediaContent> val =
+				new Validator<>(MediaContent.class, MediaContent.class);
+
 		//TODO: Coded around NullPointer exception on media2
 		Colfer.register(groups);
 
-		runCorrectness(groups);
+		val.checkForCorrectness(groups, "data");
 	}
 }

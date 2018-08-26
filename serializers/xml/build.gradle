@@ -13,7 +13,8 @@ dependencies {
     compile 'org.codehaus.woodstox:stax2-api:4.1'
     compile 'javax.xml.stream:stax-api:1.0-2'
     compile 'com.thoughtworks.xstream:xstream:1.4.10'
-    compile 'org.javolution:javolution-core-java:6.0.0'
+    //compile 'org.javolution:javolution-core-java:6.0.0' // This version does not work
+    compile 'javolution:javolution:5.5.1'
     compile 'com.siemens.ct.exi:exificient:0.9.7'
     compile 'com.fasterxml:aalto-xml:1.1.0'
     compile 'org.codehaus.woodstox:woodstox-core-asl:4.4.1'

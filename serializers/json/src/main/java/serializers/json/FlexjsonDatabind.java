@@ -1,12 +1,18 @@
 package serializers.json;
 
-import java.io.*;
-
-import serializers.*;
-
 import data.media.MediaContent;
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.IOException;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 /**
  * This serializer uses Flexjson for data binding.  
@@ -14,34 +20,34 @@ import flexjson.JSONSerializer;
  */
 public class FlexjsonDatabind
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(REFLECTION)
+            .mode(CODE_FIRST)
+            .valueType(POJO)
+            .name("flexjson")
+            .feature(SerializerProperties.Features.SUPPORTS_CYCLIC_REFERENCES)
+            .projectURL("http://flexjson.sourceforge.net")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-                    new GenericSerializer<MediaContent>("json/flexjson/databind", MediaContent.class),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FULL_GRAPH,
-                    SerClass.ZERO_KNOWLEDGE,
-                    ""
-            )
-    );
+                    new GenericSerializer<MediaContent>(properties, MediaContent.class));
   }
 
   static class GenericSerializer<T> extends Serializer<T>
   {
-    private final String name;
+
     private final Class<T> type;
 
-    public GenericSerializer(String name, Class<T> clazz)
+    public GenericSerializer(SerializerProperties properties, Class<T> clazz)
     {
-      this.name = name;
+      super(properties);
       type = clazz;
     }
 
-    public String getName()
-    {
-      return name;
-    }
 
     public T deserialize(byte[] array) throws Exception
     {

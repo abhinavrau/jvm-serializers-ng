@@ -19,10 +19,12 @@ dependencies {
 publishing {
     publications {
         jarFileOne(MavenPublication) {
-            groupId 'obser'
-            artifactId 'obser'
-            version '0.9.0-SNAPSHOT'
-            artifact file('lib/obser-0.9.0-SNAPSHOT.jar')
+            afterEvaluate {
+                groupId 'obser'
+                artifactId 'obser'
+                version '0.9.0-SNAPSHOT'
+                artifact file('lib/obser-0.9.0-SNAPSHOT.jar')
+            }
         }
 
     }

@@ -1,22 +1,23 @@
 package serializers.mongodb;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
-import serializers.mongodb.MongoDB;
-import serializers.mongodb.MongoDBManual;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
-public class MongoDBTest extends CorrectnessCheckHelper {
+public class MongoDBTest  {
 
 
 	@Test
 	public void TestCorrectness() throws Exception
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
+		Validator<MediaContent, MediaContent> val =
+				new Validator<>(MediaContent.class, MediaContent.class);
 		MongoDBManual.register(groups);
 		MongoDB.register(groups);
 
-		runCorrectness(groups);
+		val.checkForCorrectness(groups, "data");
 	}
 }

@@ -1,116 +1,105 @@
 package serializers.jboss;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-
-import org.jboss.marshalling.ByteInput;
-import org.jboss.marshalling.ByteOutput;
-import org.jboss.marshalling.ClassExternalizerFactory;
-import org.jboss.marshalling.ClassTable;
-import org.jboss.marshalling.Externalizer;
-import org.jboss.marshalling.Marshaller;
-import org.jboss.marshalling.MarshallerFactory;
-import org.jboss.marshalling.Marshalling;
-import org.jboss.marshalling.MarshallingConfiguration;
-import org.jboss.marshalling.Unmarshaller;
-import org.jboss.marshalling.river.RiverMarshallerFactory;
-import org.jboss.marshalling.serial.SerialMarshallerFactory;
-
 import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
-import serializers.*;
+import org.jboss.marshalling.*;
+import org.jboss.marshalling.river.RiverMarshallerFactory;
+import org.jboss.marshalling.serial.SerialMarshallerFactory;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.OPTIMIZED;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY_JDK_COMPATIBLE;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 public class JBossMarshalling {
 
-	public static void register(final TestGroups groups) {
+	public static void register(final MediaContentTestGroup groups) {
 		MarshallerFactory riverFactory = new RiverMarshallerFactory();
+
+		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+		SerializerProperties properties = builder.format(BINARY)
+				.apiStyle(REFLECTION)
+				.mode(CODE_FIRST)
+				.valueType(POJO)
+				.name("jboss-marshalling-river")
+				.projectURL("https://github.com/jboss-remoting/jboss-marshalling")
+				.build();
 
 		groups.media.add(
 			JavaBuiltIn.mediaTransformer,
-			new MarshallingSerializer<MediaContent>(
+			new MarshallingSerializer<>(properties,
 				MediaContent.class,
-				"jboss-marshalling-river",
 				riverFactory,
 				false,
 				false
-			),
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.ZERO_KNOWLEDGE,
-                        "full graph zero knowledge"
-                )
-        );
+			));
+
+		SerializerProperties manual_properties = properties.toBuilder()
+				.feature(OPTIMIZED)
+				.optimizedDescription("manual optimizations")
+				.build();
+
 		groups.media.add(
 			JavaBuiltIn.mediaTransformer,
-			new MarshallingSerializer<MediaContent>(
+			new MarshallingSerializer<>(manual_properties,
 				MediaContent.class,
-				"jboss-marshalling-river-manual",
 				riverFactory,
 				false,
 				true
-			),
-            new SerFeatures(
-                    SerFormat.BINARY,
-                    SerGraph.FULL_GRAPH,
-                    SerClass.MANUAL_OPT,
-                    "full graph with manual optimizations"
-            )
-        );
+			));
+
+		SerializerProperties prereg_properties = properties.toBuilder()
+				.feature(OPTIMIZED)
+				.optimizedDescription("preregistered classes")
+				.build();
+
 		groups.media.add(
 			JavaBuiltIn.mediaTransformer,
-			new MarshallingSerializer<MediaContent>(
+			new MarshallingSerializer<>(prereg_properties,
 				MediaContent.class,
-				"jboss-marshalling-river-ct",
 				riverFactory,
 				true,
 				false
-			),
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.CLASSES_KNOWN,
-                        "full graph with preregistered classes"
-                )
-		);
+			));
+
+		SerializerProperties prepred_manual_properties = properties.toBuilder()
+				.feature(OPTIMIZED)
+				.optimizedDescription("preregistered classes + manual optimization")
+				.build();
+
 		groups.media.add(
 			JavaBuiltIn.mediaTransformer,
-			new MarshallingSerializer<MediaContent>(
+			new MarshallingSerializer<>(prepred_manual_properties,
 				MediaContent.class,
-				"jboss-marshalling-river-ct-manual",
 				riverFactory,
 				true,
 				true
-			),
-            new SerFeatures(
-                    SerFormat.BINARY,
-                    SerGraph.FULL_GRAPH,
-                    SerClass.MANUAL_OPT,
-                    "full graph preregistered classes, manual optimization"
-            )
-		);
+			));
+
+		SerializerProperties serial_properties = properties.toBuilder()
+				.format(BINARY_JDK_COMPATIBLE)
+				.optimizedDescription("serializable")
+				.build();
+
 		groups.media.add(
 			JavaBuiltIn.mediaTransformer,
-			new MarshallingSerializer<MediaContent>(
+			new MarshallingSerializer<>(serial_properties,
 				MediaContent.class,
-				"jboss-marshalling-serial",
 				new SerialMarshallerFactory(),
 				false,
 				false
-			),
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.ZERO_KNOWLEDGE,
-                        ""
-                )
-		);
+			));
 	}
 
 	private static final class MarshallingSerializer<T> extends Serializer<T> {
@@ -121,21 +110,20 @@ public class JBossMarshalling {
 
 	    private final Unmarshaller unmarshaller;
 
-	    private final String name;
 
 	    private final ByteArrayInput input = new ByteArrayInput();
 
 	    private final ByteArrayOutput output = new ByteArrayOutput();
 
-	    public MarshallingSerializer(
+	    public MarshallingSerializer(SerializerProperties properties,
     		final Class<T> clz,
-    		final String name,
     		final MarshallerFactory marshallerFactory,
     		final boolean useCustomClassTable,
     		final boolean useExternalizers
 		) {
+	    	super(properties);
 	    	this.clz = clz;
-	    	this.name = name;
+
 
 	    	MarshallingConfiguration cfg = new MarshallingConfiguration();
 	    	cfg.setBufferSize(Serializer.BUFFER_SIZE);
@@ -157,10 +145,6 @@ public class JBossMarshalling {
 			}
 	    }
 
-        @Override
-		public String getName() {
-        	return name;
-        }
 
         @Override
 		public T deserialize(final byte[] array) throws Exception {

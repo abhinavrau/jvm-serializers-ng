@@ -6,6 +6,7 @@ import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
 import serializers.*;
+import serializers.core.metadata.SerializerProperties;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,6 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static data.media.FieldMapping.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
+import static serializers.core.metadata.SerializerProperties.Format.JSON;
 
 /**
  * "Hand-written" version of Jackson-based codec. Not optimized for compactness,
@@ -38,23 +43,26 @@ public class JacksonJsonManual extends BaseJacksonDriver<MediaContent>
     protected final static SerializedString FIELD_COPYRIGHT = new SerializedString(FULL_FIELD_NAME_COPYRIGHT);
     protected final static SerializedString FIELD_PERSONS = new SerializedString(FULL_FIELD_NAME_PERSONS);
     
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder.format(JSON)
+                .apiStyle(FIELD_BASED)
+                .mode(CODE_FIRST)
+                .valueType(NONE)
+                .name("jackson")
+                .projectURL("https://github.com/FasterXML/jackson-databind")
+                .build();
+
         JsonFactory factory = new JsonFactory();
-        groups.media.add(JavaBuiltIn.mediaTransformer, new JacksonJsonManual("json/serializers.jackson/manual",factory),
-                new SerFeatures(SerFormat.JSON,
-                        SerGraph.FLAT_TREE,
-                        SerClass.MANUAL_OPT,
-                        ""
-                )
-        );
+        groups.media.add(JavaBuiltIn.mediaTransformer, new JacksonJsonManual(properties,factory));
     }
 
     private final JsonFactory _factory;
 
-    public JacksonJsonManual(String name, JsonFactory jsonFactory)
+    public JacksonJsonManual(SerializerProperties properties, JsonFactory jsonFactory)
     {
-        super(name);
+        super(properties);
         _factory = jsonFactory;
     }
 

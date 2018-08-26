@@ -1,20 +1,23 @@
 package serializers.obser;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
-
-public class ObserTest extends CorrectnessCheckHelper {
+public class ObserTest  {
 
 
 	@Test
 	public void TestCorrectness() throws Exception
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
 		Obser.register(groups);
 
-		runCorrectness(groups);
+		Validator<MediaContent, MediaContent> val =
+				new Validator<>(MediaContent.class, MediaContent.class);
+		val.checkForCorrectness(groups, "data");
+
 	}
 }

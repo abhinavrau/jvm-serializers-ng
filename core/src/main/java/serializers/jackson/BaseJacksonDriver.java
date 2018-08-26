@@ -1,25 +1,19 @@
 package serializers.jackson;
 
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import serializers.Serializer;
-
 abstract class BaseJacksonDriver<T> extends Serializer<T>
 {
-    protected final String name;
 
-    protected BaseJacksonDriver(String n)
+    public BaseJacksonDriver(SerializerProperties properties)
     {
-        name = n;
+        super(properties);
     }
-
-    @Override
-    public final String getName() {
-        return name;
-    }
-
     @Override
     public abstract byte[] serialize(T data) throws IOException;
 

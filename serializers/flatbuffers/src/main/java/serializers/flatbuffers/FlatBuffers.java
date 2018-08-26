@@ -1,31 +1,51 @@
 package serializers.flatbuffers;
 
 import com.google.flatbuffers.FlatBufferBuilder;
-import serializers.*;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+import serializers.flatbuffers.media.*;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import serializers.flatbuffers.media.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.BUILD_TIME_CODE_GENERATION;
+import static serializers.core.metadata.SerializerProperties.Features.JSON_CONVERTER;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_ADDITIONAL_LANGUAGES;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_BACKWARD_COMPATIBILITY;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.CUSTOM_TYPE;
 
 public class FlatBuffers {
-    public static void register(TestGroups groups) {
-        groups.media.add(JavaBuiltIn.mediaTransformer, new FBSerializer(),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.CLASSES_KNOWN,
-                        ""
-                )
-        );
+    public static void register(MediaContentTestGroup groups) {
+
+	    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+	    SerializerProperties properties = builder.format(BINARY)
+			    .apiStyle(BUILD_TIME_CODE_GENERATION)
+			    .mode(SCHEMA_FIRST)
+			    .valueType(CUSTOM_TYPE)
+			    .name("flatbuffers")
+			    .feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+			    .feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+			    .feature(JSON_CONVERTER)
+			    .projectURL("https://google.github.io/flatbuffers/")
+			    .build();
+
+	    groups.media.add(JavaBuiltIn.mediaTransformer, new FBSerializer(properties));
     }
 
     static final class FBSerializer extends Serializer<data.media.MediaContent> {
 	    ByteBuffer bb = ByteBuffer.allocate(1024);
 
-        public String getName() { return "flatbuffers"; }
+	    public FBSerializer(SerializerProperties properties)
+	    {
+	    	super(properties);
+	    }
+
 
         @Override
         public data.media.MediaContent deserialize (byte[] array) throws Exception {
@@ -73,6 +93,7 @@ public class FlatBuffers {
 					media.duration,
 					media.size,
 					media.bitrate,
+					media.hasBitrate,
 					person,
 					player,
 					copyright);
@@ -121,7 +142,7 @@ public class FlatBuffers {
 				media.duration(),
 				media.size(),
 				media.bitrate(),
-				media.bitrate() != 0,
+				media.hasBitrate(),
 				reversePersons(media),
 				reversePlayer(media.player()),
 				media.copyright()

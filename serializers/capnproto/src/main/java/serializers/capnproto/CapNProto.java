@@ -1,8 +1,11 @@
 package serializers.capnproto;
 
 import org.capnproto.*;
-import serializers.*;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
 import serializers.capnproto.media.Mediacontent;
+import serializers.core.metadata.SerializerProperties;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -11,28 +14,44 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static serializers.core.metadata.SerializerProperties.APIStyle.BUILD_TIME_CODE_GENERATION;
+import static serializers.core.metadata.SerializerProperties.ValueType.BUILDER_PATTERN;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_ADDITIONAL_LANGUAGES;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_BACKWARD_COMPATIBILITY;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
+
 public class CapNProto {
-    public static void register(TestGroups groups) {
-        groups.media.add(JavaBuiltIn.mediaTransformer, new CPSerializer(),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.CLASSES_KNOWN,
-                        ""
-                )
-        );
+    public static void register(MediaContentTestGroup groups) {
+
+
+	    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+	    SerializerProperties properties = builder.format(BINARY)
+			    .apiStyle(BUILD_TIME_CODE_GENERATION)
+			    .mode(SCHEMA_FIRST)
+			    .valueType(BUILDER_PATTERN)
+			    .feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+			    .feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+			    .name("capnproto")
+			    .projectURL("https://capnproto.org/")
+			    .build();
+
+	    groups.media.add(JavaBuiltIn.mediaTransformer, new CPSerializer(properties));
+
     }
 
     static final class CPSerializer extends Serializer<data.media.MediaContent> {
 	    //MessageBuilder message = new MessageBuilder();//TODO: no reset!?
 	    ArrayOutputStream os;
 
-	    public CPSerializer() {
+	    public CPSerializer(SerializerProperties properties)
+	    {
+	    	super(properties);
 		    os = new ArrayOutputStream(ByteBuffer.allocate(1024*3));
 		    os.buf.order(ByteOrder.LITTLE_ENDIAN);
 	    }
 
-        public String getName() { return "CapnProto"; }
+
 
         @Override
         public data.media.MediaContent deserialize (byte[] array) throws Exception {
@@ -68,6 +87,7 @@ public class CapNProto {
 			builder.setDuration(media.duration);
 			builder.setSize(media.size);
 			builder.setBitrate(media.bitrate);
+			builder.setHasBitrate(media.hasBitrate);
 			TextList.Builder persons = builder.initPersons(media.persons.size());
 			for (int i = 0; i < media.persons.size(); i++) {
 				persons.set(i, new Text.Reader(media.persons.get(i)));
@@ -122,7 +142,7 @@ public class CapNProto {
 				media.getDuration(),
 				media.getSize(),
 				media.getBitrate(),
-				media.getBitrate() != 0,
+				media.getHasBitrate(),
 				reversePersons(media.getPersons()),
 				reversePlayer(media.getPlayer()),
 				media.hasCopyright() ? media.getCopyright().toString() : null

@@ -26,9 +26,10 @@ table Media {
   duration:long (id: 5);
   size:long (id: 6);
   bitrate:int (id: 7);
-  persons:[string] (id: 8, required);
-  player:Player (id: 9);
-  copyright:string (id: 10);
+  hasBitrate:bool(id: 8);
+  persons:[string] (id: 9, required);
+  player:Player (id: 10);
+  copyright:string (id: 11);
 }
 
 table MediaContent {

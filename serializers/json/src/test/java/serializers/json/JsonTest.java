@@ -1,18 +1,19 @@
 package serializers.json;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 import serializers.jackson.JacksonJsonManual;
 
 
-public class JsonTest extends CorrectnessCheckHelper {
+public class JsonTest {
 
 
 	@Test
 	public void TestCorrectness() throws Throwable
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
 		JacksonJsonManual.register(groups);
 		//TODO: All commented lines fail with null on media.2.json
 		FastJSONArrayDatabind.register(groups);
@@ -33,6 +34,9 @@ public class JsonTest extends CorrectnessCheckHelper {
 		JsonSmartManualTree.register(groups);
 		JsonSvensonDatabind.register(groups);
 
-		runCorrectness(groups);
+		Validator<MediaContent,MediaContent> val = new Validator<>(MediaContent.class,
+				MediaContent.class);
+
+		val.checkForCorrectness(groups, "data");
 	}
 }

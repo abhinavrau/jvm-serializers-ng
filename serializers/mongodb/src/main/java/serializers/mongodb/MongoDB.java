@@ -8,32 +8,44 @@ import org.bson.ByteBufNIO;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
-import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.io.BasicOutputBuffer;
 import org.bson.io.ByteBufferBsonInput;
 import org.bson.io.OutputBuffer;
-import serializers.*;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
-import java.io.*;
-import java.lang.reflect.Array;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_ADDITIONAL_LANGUAGES;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_CYCLIC_REFERENCES;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 public class MongoDB
 {
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
-        groups.media.add(JavaBuiltIn.mediaTransformer, new MongoDBSerializer<MediaContent>(MediaContent.class),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.ZERO_KNOWLEDGE,"Using new BSON Pojo support"
-                ) 
-        );
+	    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+	    SerializerProperties properties = builder.format(BINARY)
+			    .apiStyle(REFLECTION)
+			    .mode(CODE_FIRST)
+			    .valueType(POJO)
+			    .name("mongodb")
+			    .feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+			    .feature(SUPPORTS_CYCLIC_REFERENCES)
+			    .projectURL("http://bsonspec.org/")
+			    .build();
+
+        groups.media.add(JavaBuiltIn.mediaTransformer, new MongoDBSerializer<MediaContent>(properties, MediaContent.class));
     }
 
     // ------------------------------------------------------------
@@ -46,8 +58,8 @@ public class MongoDB
 		private final CodecRegistry pojoCodecRegistry;
 		private final Codec<T> codec;
 
-	    public MongoDBSerializer(Class<T> c) {
-
+	    public MongoDBSerializer(SerializerProperties properties , Class<T> c) {
+			super(properties);
 			clz = c;
 
 		    pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
@@ -55,8 +67,6 @@ public class MongoDB
 
 		    codec = pojoCodecRegistry.get(clz);
 	    }
-	    
-            public String getName() { return "bson/mongodb/PojoCodecProvider"; }
 
             @SuppressWarnings("unchecked")
             public T deserialize(byte[] array) throws Exception

@@ -1,31 +1,40 @@
 package serializers.externalizor;
 
-import java.io.*;
-
-import data.media.MediaContent;
-
 import com.qwazr.externalizor.Externalizor;
+import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
-import serializers.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
+import static serializers.core.metadata.SerializerProperties.Features.OPTIMIZED;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
 
 public class Externalizors
 {
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
-        groups.media.add(JavaBuiltIn.mediaTransformer, new ExternalizorSerializer<MediaContent>(MediaContent.class),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.ZERO_KNOWLEDGE,""
-                ) 
-        );
-	    groups.media.add(JavaBuiltIn.mediaTransformer, new GZIPExternalizorSerializer<MediaContent>(MediaContent.class),
-			    new SerFeatures(
-					    SerFormat.BIN_CROSSLANG,
-					    SerGraph.FULL_GRAPH,
-					    SerClass.ZERO_KNOWLEDGE,""
-			    )
-	    );
+	    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+	    SerializerProperties properties = builder.format(BINARY)
+			    .apiStyle(REFLECTION)
+			    .mode(CODE_FIRST)
+			    .valueType(POJO)
+			    .name("externalizor")
+			    .projectURL("https://github.com/qwazr/externalizor")
+			    .build();
+
+	    SerializerProperties gzip_properties = properties.toBuilder()
+			    .feature(OPTIMIZED).build();
+
+        groups.media.add(JavaBuiltIn.mediaTransformer, new ExternalizorSerializer<MediaContent>(MediaContent.class, properties));
+	    groups.media.add(JavaBuiltIn.mediaTransformer, new GZIPExternalizorSerializer<MediaContent>(MediaContent.class, gzip_properties));
     }
 
     // ------------------------------------------------------------
@@ -36,9 +45,9 @@ public class Externalizors
 	    private final Class<T> clz;
 
 	    
-	    public ExternalizorSerializer(Class<T> c) { clz = c; }
-	    
-            public String getName() { return "externalizor"; }
+	    public ExternalizorSerializer(Class<T> c, SerializerProperties properties) {
+	    	super(properties);clz = c;
+	    }
 
             @SuppressWarnings("unchecked")
             public T deserialize(byte[] array) throws Exception
@@ -63,9 +72,10 @@ public class Externalizors
 		private final Class<T> clz;
 
 
-		public GZIPExternalizorSerializer(Class<T> c) { clz = c; }
-
-		public String getName() { return "externalizor/gzip"; }
+		public GZIPExternalizorSerializer(Class<T> c, SerializerProperties properties) {
+			super(properties);
+			clz = c;
+		}
 
 		@SuppressWarnings("unchecked")
 		public T deserialize(byte[] array) throws Exception

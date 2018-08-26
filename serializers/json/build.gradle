@@ -19,7 +19,7 @@ dependencies {
     compile 'com.github.cliftonlabs:json-simple:3.0.2'
     compile 'cc.plural:jsonij:0.2.7'
     compile 'com.jayway.jsonpath:json-path:2.4.0'
-    compile 'com.alibaba:fastjson:1.2.46'
+    compile 'com.alibaba:fastjson:1.2.47'
     compile 'net.sf.flexjson:flexjson:3.3'
     compile 'com.dslplatform:dsl-json:1.7.1'
     compile 'com.google.code.gson:gson:2.8.2'

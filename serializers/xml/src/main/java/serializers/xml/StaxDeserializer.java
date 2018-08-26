@@ -1,27 +1,16 @@
 package serializers.xml;
 
-import static data.media.FieldMapping.FULL_FIELD_NAME_BITRATE;
-import static data.media.FieldMapping.FULL_FIELD_NAME_COPYRIGHT;
-import static data.media.FieldMapping.FULL_FIELD_NAME_DURATION;
-import static data.media.FieldMapping.FULL_FIELD_NAME_FORMAT;
-import static data.media.FieldMapping.FULL_FIELD_NAME_HEIGHT;
-import static data.media.FieldMapping.FULL_FIELD_NAME_IMAGES;
-import static data.media.FieldMapping.FULL_FIELD_NAME_MEDIA;
-import static data.media.FieldMapping.FULL_FIELD_NAME_PERSONS;
-import static data.media.FieldMapping.FULL_FIELD_NAME_PLAYER;
-import static data.media.FieldMapping.FULL_FIELD_NAME_SIZE;
-import static data.media.FieldMapping.FULL_FIELD_NAME_TITLE;
-import static data.media.FieldMapping.FULL_FIELD_NAME_URI;
-import static data.media.FieldMapping.FULL_FIELD_NAME_WIDTH;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.stream.*;
-
 import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
+
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import static data.media.FieldMapping.*;
 
 public class StaxDeserializer
 {
@@ -79,7 +68,7 @@ public class StaxDeserializer
       {
            Image image = new Image();
            image.uri = readElement(parser, FULL_FIELD_NAME_URI);
-           image.title = readElement(parser, FULL_FIELD_NAME_TITLE);
+           image.title = readElementMaybe(parser, FULL_FIELD_NAME_TITLE);
            image.width = Integer.parseInt(readElement(parser, FULL_FIELD_NAME_WIDTH));
            image.height = Integer.parseInt(readElement(parser, FULL_FIELD_NAME_HEIGHT));
            image.size = imageSize(readElement(parser, FULL_FIELD_NAME_SIZE));

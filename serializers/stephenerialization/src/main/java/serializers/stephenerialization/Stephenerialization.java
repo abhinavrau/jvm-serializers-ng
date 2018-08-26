@@ -1,24 +1,39 @@
 package serializers.stephenerialization;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import data.media.MediaTransformer;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import data.media.MediaTransformer;
-
-import serializers.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_BACKWARD_COMPATIBILITY;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_CYCLIC_REFERENCES;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO_WITH_ANNOTATIONS;
 
 
 public class Stephenerialization {
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder
+                .format(BINARY)
+                .mode(CODE_FIRST)
+                .apiStyle(REFLECTION)
+                .valueType(POJO_WITH_ANNOTATIONS)
+                .feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+                .feature(SUPPORTS_CYCLIC_REFERENCES)
+                .name("stephenerialization")
+                .projectURL("https://bitbucket.org/enraged_ginger/stephenerialization/wiki/Home")
+                .build();
+
         groups.media.add(mediaTransformer,
-                new StephenerializationSerializer<MediaContent>("stephenerialization"),
-                new SerFeatures(SerFormat.BINARY, SerGraph.FULL_GRAPH, SerClass.ZERO_KNOWLEDGE));
+                new StephenerializationSerializer<>(properties));
     }
 
     // ------------------------------------------------------------
@@ -26,10 +41,10 @@ public class Stephenerialization {
 
     public static class StephenerializationSerializer<T> extends Serializer<T>
     {
-        private final String name;
-        public StephenerializationSerializer(String name)
+
+        public StephenerializationSerializer(SerializerProperties properties)
         {
-            this.name = name;
+            super(properties);
         }
 
         public T deserialize(byte[] array) throws Exception
@@ -46,11 +61,6 @@ public class Stephenerialization {
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(data);
             return baos.toByteArray();
-        }
-
-        public String getName()
-        {
-            return name;
         }
     }
 

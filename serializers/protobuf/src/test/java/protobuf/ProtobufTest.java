@@ -1,20 +1,24 @@
 package serializers.protobuf;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
-import serializers.jackson.JacksonJsonManual;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
-public class ProtobufTest extends CorrectnessCheckHelper {
+public class ProtobufTest  {
 
 
 	@Test
 	public void TestCorrectness() throws Throwable
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
+
 		Protobuf.register(groups);
 		ProtobufJson.register(groups);
-		runCorrectness(groups);
+		Validator<MediaContent, MediaContent> val =
+				new Validator<>(MediaContent.class, MediaContent.class);
+
+		val.checkForCorrectness(groups, "data");
 	}
 }

@@ -1,42 +1,54 @@
 package serializers.jackson;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.core.*;
-
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import serializers.*;
-
 import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.OPTIMIZED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 /**
  * Driver that uses Jackson for manual tree processing (to/from byte[]).
  */
 public class JacksonJsonTree extends BaseJacksonDataBind<MediaContent>
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder.format(SerializerProperties.Format.JSON)
+            .apiStyle(REFLECTION)
+            .mode(CODE_FIRST)
+            .valueType(POJO)
+            .name("jackson")
+            .feature(OPTIMIZED)
+            .projectURL("https://github.com/FasterXML/jackson-databind")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer, new JacksonJsonTree(
-            "json/serializers.jackson/tree",new ObjectMapper()),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+                    properties,new ObjectMapper()));
   }
 
-  public JacksonJsonTree(String name, ObjectMapper mapper) {
-      super(name, MediaContent.class, mapper);
+  public JacksonJsonTree(SerializerProperties properties, ObjectMapper mapper) {
+      super(properties, MediaContent.class, mapper);
   }
 
   @Override
@@ -57,8 +69,8 @@ public class JacksonJsonTree extends BaseJacksonDataBind<MediaContent>
   {
       JsonGenerator generator = constructGenerator(out);
       // JSON allows simple sequences, so:
-      for (int i = 0, len = items.length; i < len; ++i) {
-          mapper.writeValue(generator, asTree(items[i], mapper.createObjectNode()));
+      for (MediaContent item : items) {
+        mapper.writeValue(generator, asTree(item, mapper.createObjectNode()));
       }
       generator.close();
   }

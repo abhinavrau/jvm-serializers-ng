@@ -1,17 +1,19 @@
 package serializers.avro;
 
-import data.media.*;
-
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import data.media.MediaTransformer;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.*;
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.BinaryDecoder;
-
-import serializers.*;
-import serializers.avro.media.player;
-import serializers.avro.media.size;
+import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.EncoderFactory;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.Transformer;
+import serializers.core.metadata.SerializerProperties;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,18 +21,29 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
+import static serializers.core.metadata.SerializerProperties.Features.*;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
+
 public class AvroGeneric
 {
-	public static void register(TestGroups groups)
+	public static void register(MediaContentTestGroup groups)
 	{
-		groups.media.add(MediaTransformer, new GenericSerializer(Avro.Media.sMediaContent),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.MANUAL_OPT,
-                        ""
-                )
-        );
+		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+		SerializerProperties properties = builder.format(BINARY)
+				.apiStyle(FIELD_BASED)
+				.mode(SCHEMA_FIRST)
+				.valueType(NONE)
+				.feature(EMBEDDED_SCHEMA)
+				.feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+				.feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+				.name("avro")
+				.projectURL("https://avro.apache.org/")
+				.build();
+
+		groups.media.add(MediaTransformer, new GenericSerializer(properties, Avro.Media.sMediaContent));
 	}
 
 
@@ -44,7 +57,6 @@ public class AvroGeneric
 
 	public static class GenericSerializer extends Serializer<GenericRecord>
 	{
-		public String getName() { return "avro-generic"; }
 
 		private final GenericDatumWriter<GenericRecord> WRITER;
 		private final GenericDatumReader<GenericRecord> READER;
@@ -52,8 +64,9 @@ public class AvroGeneric
 		private BinaryEncoder encoder;
 		private BinaryDecoder decoder;
 
-		public GenericSerializer(Schema schema)
+		public GenericSerializer(SerializerProperties properties, Schema schema)
 		{
+			super(properties);
 			WRITER = new GenericDatumWriter<GenericRecord>(schema);
 			READER = new GenericDatumReader<GenericRecord>(schema);
 		}

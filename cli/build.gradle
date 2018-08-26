@@ -1,14 +1,40 @@
 group 'com.github.jvm-serializers-ng'
 version '1.0-SNAPSHOT'
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.3'
+    }
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'application'
 apply plugin: 'java'
 
 sourceCompatibility = 1.8
 
+mainClassName = "serializers.cli.Cli"
+
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
+ext {
+
+    jmhVersion = '1.20'
+}
+
 dependencies {
-    compile 'info.picocli:picocli:3.0.0-beta-2'
+    compile 'info.picocli:picocli:3.4.0'
+    compile project(':serializers')
+    compile 'de.vandermeer:asciitable:0.3.2'
+
+    // IMPORTANT: Leave JMH at the end!
+    // JMH
+    //compile group: 'org.openjdk.jmh', name: 'jmh-core', version: "${jmhVersion}"
+    //apt group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: "${jmhVersion}"
 }

@@ -6,16 +6,13 @@ apply plugin: 'java'
 
 repositories {
     mavenCentral()
-    flatDir
-            {
-                dirs '../../lib'
-            }
 }
 
 dependencies {
     compile project(':core')
     //TODO: This is an old version. New version is 0.8+
-    compile 'org.msgpack:msgpack:0.6.12'
+    compile 'org.msgpack:msgpack-core:0.8.16'
+    compile 'org.msgpack:jackson-dataformat-msgpack:0.8.16'
     //compile name: 'javassist-3.15.0-GA'
     testCompile project (path: ':core', configuration: 'testArchives')
 }

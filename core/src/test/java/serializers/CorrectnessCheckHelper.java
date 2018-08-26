@@ -6,11 +6,11 @@ public class CorrectnessCheckHelper {
 
 
 
-	public void runCorrectness(TestGroups groups) throws Exception
+	public void runCorrectness(MediaContentTestGroup groups) throws Exception
 	{
 		MediaItemBenchmark benchmark = new MediaItemBenchmark() {
 			@Override
-			public void addTests(TestGroups groups) {
+			public void addTests(MediaContentTestGroup groups) {
 
 
 			}

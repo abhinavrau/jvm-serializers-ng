@@ -28,6 +28,7 @@ module full {
         long duration;
         long size;
         int bitrate;
+        bool hasBitrate;
         List<String> persons;
         shared.Player player;
         String? copyright;
@@ -57,6 +58,7 @@ module minified {
         long duration { serialization name d; }
         long size { serialization name s; }
         int bitrate { serialization name b; }
+        bool hasBitrate { serialization name hb;}
         List<String> persons { serialization name p; }
         shared.Player player { serialization name l; }
         String? copyright { serialization name c; }

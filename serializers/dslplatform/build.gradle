@@ -28,8 +28,8 @@ repositories {
 
 dependencies {
     compile project(':core')
-    compile 'com.dslplatform:dsl-json-java8:1.7.1'
-    //annotationProcessor 'com.dslplatform:dsl-json-java8:1.7.1'
+    compile 'com.dslplatform:dsl-json-java8:1.8.0'
+    //annotationProcessor 'com.dslplatform:dsl-json-java8:1.7.4'
     testCompile project (path: ':core', configuration: 'testArchives')
 }
 

@@ -1,9 +1,11 @@
 package serializers.dslplatform;
 
+import data.media.MediaContent;
 import org.junit.Test;
 import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
-
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
+import serializers.dslplatform.data.media.DSLMediaContent;
 
 
 public class DSLPlatformTest extends CorrectnessCheckHelper {
@@ -12,9 +14,25 @@ public class DSLPlatformTest extends CorrectnessCheckHelper {
 	@Test
 	public void TestCorrectness() throws Exception
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
+		Validator<MediaContent, MediaContent> val =
+				new Validator<>(MediaContent.class, MediaContent.class);
+
 		DSLPlatform.register(groups);
 
-		runCorrectness(groups);
+		val.checkForCorrectness(groups, "data");
 	}
+
+	@Test
+	public void TestCorrectnessWithAnnotationProcessor() throws Exception
+	{
+		MediaContentTestGroup groups = new MediaContentTestGroup();
+		Validator<DSLMediaContent, DSLMediaContent> val =
+				new Validator<>(DSLMediaContent.class, DSLMediaContent.class);
+
+		DSLPlatform.registerAnnotationBased(groups);
+
+		val.checkForCorrectness(groups, "data");
+	}
+
 }

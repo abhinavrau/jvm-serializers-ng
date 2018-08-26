@@ -1,43 +1,52 @@
 package serializers.json;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import serializers.*;
-
 import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 /**
  * This serializer uses JSON-lib [http://json-lib.sourceforge.net] for JSON data binding.
  */
 public class JsonLibJsonDatabind
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(REFLECTION)
+            .mode(CODE_FIRST)
+            .valueType(POJO)
+            .name("json-lib")
+            .projectURL("http://json-lib.sourceforge.net")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new GenericSerializer<MediaContent>("json/json-lib/databind", MediaContent.class),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.ZERO_KNOWLEDGE,
-                    ""
-            )
-    );
+        new GenericSerializer<MediaContent>(properties, MediaContent.class));
   }
 
   static class GenericSerializer<T> extends Serializer<T>
   {
-    private final String name;
     private final Class<T> type;
     // private final net.sf.ezmorph.MorpherRegistry _morpherRegistry;
     private final net.sf.json.JsonConfig _jsonConfig;
 
-    public GenericSerializer(String name, Class<T> clazz)
+    public GenericSerializer(SerializerProperties properties, Class<T> clazz)
     {
-      this.name = name;
+      super(properties);
       type = clazz;
 
       net.sf.ezmorph.MorpherRegistry _morpherRegistry = net.sf.json.util.JSONUtils.getMorpherRegistry();
@@ -60,11 +69,6 @@ public class JsonLibJsonDatabind
                 return net.sf.json.JSONNull.getInstance();
             }
           });
-    }
-
-    public String getName()
-    {
-      return name;
     }
 
     @SuppressWarnings("unchecked")

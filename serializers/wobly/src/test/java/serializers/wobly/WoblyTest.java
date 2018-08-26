@@ -1,20 +1,23 @@
 package serializers.wobly;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
-
-public class WoblyTest extends CorrectnessCheckHelper {
+public class WoblyTest {
 
 
 	@Test
 	public void TestCorrectness() throws Exception
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
 		Wobly.register(groups);
 
-		runCorrectness(groups);
+		Validator<MediaContent,MediaContent> val = new Validator<>(data.media.MediaContent.class,
+				MediaContent.class);
+
+		val.checkForCorrectness(groups, "data");
 	}
 }

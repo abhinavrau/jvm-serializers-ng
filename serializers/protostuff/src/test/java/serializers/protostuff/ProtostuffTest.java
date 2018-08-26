@@ -1,24 +1,27 @@
 package serializers.protostuff;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
-public class ProtostuffTest extends CorrectnessCheckHelper {
+public class ProtostuffTest  {
 
 
 	@Test
 	public void TestCorrectness() throws Throwable
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
 
-		// TODO: Fix this test below as it fails as it does not honor the optional fields
-		//Protostuff.register(groups);
+		Protostuff.register(groups);
 		ProtostuffJson.register(groups);
 		ProtostuffSmile.register(groups);
 		ProtostuffXml.register(groups);
 
-		runCorrectness(groups);
+		Validator<MediaContent, MediaContent> val =
+				new Validator<>(MediaContent.class, MediaContent.class);
+
+		val.checkForCorrectness(groups, "data");
 	}
 }

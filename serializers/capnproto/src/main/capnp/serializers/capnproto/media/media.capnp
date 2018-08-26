@@ -24,13 +24,14 @@ struct Media {
   duration @5 :Int64;
   size @6 :Int64;
   bitrate @7 :Int32;
-  persons @8 :List(Text);
+  hasBitrate @8 :Bool;
+  persons @9 :List(Text);
   enum Player {
     java @0;
     flash @1;
   }
-  player @9 :Player;
-  copyright @10 :Text;
+  player @10 :Player;
+  copyright @11 :Text;
 }
 
 struct MediaContent {

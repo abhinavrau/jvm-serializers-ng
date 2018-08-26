@@ -1,14 +1,15 @@
 package serializers.wobly.simple;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import serializers.Serializer;
 import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
 import data.media.MediaTransformer;
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class WoblySimpleUtils {
 	public static WMedia forwardMedia(Media a) {
@@ -60,6 +61,10 @@ public class WoblySimpleUtils {
 	}
 	public static final class WoblySerializer extends Serializer<WMediaContent>
 	{
+		public WoblySerializer(SerializerProperties properties)
+		{
+			super(properties);
+		}
 		@Override
 		public WMediaContent deserialize(byte[] array)
 				throws Exception {
@@ -70,11 +75,6 @@ public class WoblySimpleUtils {
 		public byte[] serialize(WMediaContent content)
 				throws Exception {
 			return content.toByteArray();
-		}
-
-		@Override
-		public String getName() {
-			return "wobly";
 		}
 	}
 }

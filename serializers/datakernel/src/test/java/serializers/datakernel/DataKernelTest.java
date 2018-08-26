@@ -1,20 +1,23 @@
 package serializers.datakernel;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
-
-public class DataKernelTest extends CorrectnessCheckHelper {
+public class DataKernelTest  {
 
 
 	@Test
 	public void TestCorrectness() throws Exception
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
+		Validator<MediaContent, DataKernelSerializer.DMediaContent> val =
+				new Validator<>(MediaContent.class, DataKernelSerializer.DMediaContent.class);
+
 		DataKernelSerializer.register(groups);
 
-		runCorrectness(groups);
+		val.checkForCorrectness(groups, "data");
 	}
 }

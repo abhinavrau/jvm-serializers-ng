@@ -1,10 +1,17 @@
 package serializers.json;
 
-import java.io.*;
-
-import serializers.*;
-
 import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 /**
  * This serializer uses Google-gson for data binding.
@@ -12,17 +19,20 @@ import data.media.MediaContent;
  */
 public class JsonGsonDatabind
 {
-	public static void register(TestGroups groups)
+	public static void register(MediaContentTestGroup groups)
 	{
-            groups.media.add(JavaBuiltIn.mediaTransformer,
-                    new GenericSerializer<MediaContent>("json/gson/databind", MediaContent.class),
-                    new SerFeatures(
-                            SerFormat.JSON,
-                            SerGraph.FLAT_TREE,
-                            SerClass.ZERO_KNOWLEDGE,
-                            ""
-                    )
-            );
+		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+		SerializerProperties properties = builder
+				.format(SerializerProperties.Format.JSON)
+				.apiStyle(REFLECTION)
+				.mode(CODE_FIRST)
+				.valueType(POJO)
+				.name("gson")
+				.projectURL("https://github.com/google/gson")
+				.build();
+
+		groups.media.add(JavaBuiltIn.mediaTransformer,
+                    new GenericSerializer<MediaContent>(properties, MediaContent.class));
 	}
 
 	// ------------------------------------------------------------
@@ -31,16 +41,13 @@ public class JsonGsonDatabind
 	static class GenericSerializer<T> extends Serializer<T>
 	{
     	        private final com.google.gson.Gson _gson = new com.google.gson.Gson();
-    	        private final String name;
     	        private final Class<T> type;
     
-    	        public GenericSerializer(String name, Class<T> clazz)
+    	        public GenericSerializer(SerializerProperties properties, Class<T> clazz)
     	        {
-    	            this.name = name;
+    	            super(properties);
     	            type = clazz;
     	        }
-    
-    	        public String getName() { return name; }
     	        
     	        public T deserialize(byte[] array) throws Exception
     	        {

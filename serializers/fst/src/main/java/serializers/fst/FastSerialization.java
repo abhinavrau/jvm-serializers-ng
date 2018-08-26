@@ -1,11 +1,22 @@
 package serializers.fst;
 
-import data.media.*;
-
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
 import org.nustaq.serialization.*;
 import serializers.*;
+import serializers.core.metadata.SerializerProperties;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.*;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY_JDK_COMPATIBLE;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 /**
  * Copyright (c) 2012, Ruediger Moeller. All rights reserved.
@@ -31,36 +42,42 @@ import java.io.*;
  */
 public class FastSerialization {
 
-    public static void register (TestGroups groups) {
+    public static void register (MediaContentTestGroup groups) {
+
         register(groups.media, JavaBuiltIn.mediaTransformer);
     }
 
     private static <T, S> void register (TestGroup<T> group, Transformer<T, S> transformer) {
-        group.add(transformer, new BasicSerializer<S>("fst-flat-pre",true,true),
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FLAT_TREE,
-                        SerClass.CLASSES_KNOWN,
-                        "fst in unshared mode with preregistered classes"
-                )
-        );
 
-        group.add(transformer, new BasicSerializer<S>("fst-flat",true,false),
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FLAT_TREE,
-                        SerClass.ZERO_KNOWLEDGE,
-                        "fst default, but unshared mode"
-                )
-        );
-        group.add(transformer, new BasicSerializer<S>("fst",false,false),
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.ZERO_KNOWLEDGE,
-                        "default: JDK serialization drop-in-replacement mode"
-                )
-        );
+
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder.format(BINARY)
+                .apiStyle(REFLECTION)
+                .mode(CODE_FIRST)
+                .valueType(POJO)
+                .name("fst")
+                .feature(JSON_CONVERTER)
+                .projectURL("https://github.com/RuedigerMoeller/fast-serialization")
+                .build();
+
+
+
+        group.add(transformer, new BasicSerializer<>(properties,true,false));
+
+        SerializerProperties prereg_properties = properties.toBuilder()
+                .feature(OPTIMIZED)
+                .build();
+
+        group.add(transformer, new BasicSerializer<>(prereg_properties,true,true));
+
+
+
+        SerializerProperties jdkcompat_properties = properties.toBuilder()
+                .format(BINARY_JDK_COMPATIBLE)
+                .feature(SUPPORTS_CYCLIC_REFERENCES)
+                .build();
+
+        group.add(transformer, new BasicSerializer<>(jdkcompat_properties,false,false));
 
     }
 
@@ -99,8 +116,8 @@ public class FastSerialization {
         String name;
         Class type[] = { MediaContent.class };
 
-        public BasicSerializer (String name, boolean flat, boolean register) {
-            this.name = name;
+        public BasicSerializer (SerializerProperties properties, boolean flat, boolean register) {
+            super(properties);
             this.unshared = flat;
             if ( flat ) {
                 if ( register ) {
@@ -144,8 +161,8 @@ public class FastSerialization {
 
         public void serializeItems (T[] items, OutputStream outStream) throws Exception {
             objectOutput.resetForReUse();
-            for (int i = 0; i < items.length; i++) {
-                objectOutput.writeObject(items[i]);
+            for (T item : items) {
+                objectOutput.writeObject(item);
             }
             outStream.write(objectOutput.getBuffer(),0,objectOutput.getWritten()); // avoid copy
         }
@@ -164,9 +181,6 @@ public class FastSerialization {
             return null;
         }
 
-        public String getName () {
-            return name;
-        }
     }
 
 }

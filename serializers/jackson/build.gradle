@@ -24,7 +24,10 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-core:' + jacksonVersion
     compile 'com.fasterxml.jackson.core:jackson-annotations:' + jacksonVersion
     compile 'com.fasterxml.jackson.core:jackson-databind:' + jacksonVersion
-    compile 'com.fasterxml.jackson.dataformat:jackson-dataformats-binary:' + jacksonVersion
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-avro:' + jacksonVersion
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-protobuf:' + jacksonVersion
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-smile:' + jacksonVersion
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:' + jacksonVersion
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:' + jacksonVersion
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:' + jacksonVersion
     compile 'com.fasterxml.jackson.jr:jackson-jr-objects:' + jacksonVersion

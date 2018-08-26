@@ -1,44 +1,51 @@
 package serializers.xml;
 
-import java.io.*;
+import com.siemens.ct.exi.EXIFactory;
+import com.siemens.ct.exi.api.stream.StAXDecoder;
+import com.siemens.ct.exi.api.stream.StAXEncoder;
+import com.siemens.ct.exi.helpers.DefaultEXIFactory;
+import serializers.JavaBuiltIn;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import com.siemens.ct.exi.EXIFactory;
-import com.siemens.ct.exi.api.stream.StAXDecoder;
-import com.siemens.ct.exi.api.stream.StAXEncoder;
-import com.siemens.ct.exi.helpers.DefaultEXIFactory;
-
-import serializers.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Format.XML;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 public class ExiExificient
 {
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
-        groups.media.add(JavaBuiltIn.mediaTransformer, new ExificientSerializer(),
-                new SerFeatures(
-                        SerFormat.XML,
-                        SerGraph.UNKNOWN,
-                        SerClass.ZERO_KNOWLEDGE,
-                        ""
-                )
-        );
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder
+                .format(XML)
+                .mode(CODE_FIRST)
+                .apiStyle(FIELD_BASED)
+                .valueType(NONE)
+                .name("exi")
+                .projectURL("https://github.com/EXIficient/exificient")
+                .build();
+
+        groups.media.add(JavaBuiltIn.mediaTransformer, new ExificientSerializer(properties));
     }
 
     public static final class ExificientSerializer extends BaseStaxMediaSerializer
     {
         private final static EXIFactory _exiFactory = DefaultEXIFactory.newInstance();
 
-        public ExificientSerializer() {
+        public ExificientSerializer(SerializerProperties properties) {
             // as of 0.9.1, getElementText() not implemented. Boo.
-            super(false);
+            super(properties,false);
         }
-        
-        @Override
-        public String getName() { return "xml/exi-manual"; }
+
 
         @Override
         protected XMLStreamReader createReader(InputStream in) throws XMLStreamException {

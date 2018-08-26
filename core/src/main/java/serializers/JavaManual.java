@@ -1,27 +1,29 @@
 package serializers;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.*;
 import java.util.ArrayList;
 
-import data.media.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 public final class JavaManual
 {
-    public static void register(TestGroups groups) {
-        groups.media.add(JavaBuiltIn.mediaTransformer, new MediaContentSerializer(),
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FLAT_TREE,
-                        SerClass.MANUAL_OPT,
-                        ""
-                )
-        );
+    public static void register(MediaContentTestGroup groups) {
+
+	    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+	    SerializerProperties properties = builder.format(BINARY)
+			    .apiStyle(FIELD_BASED)
+			    .valueType(NONE)
+			    .name("jdk-serializable")
+			    .build();
+
+	    groups.media.add(JavaBuiltIn.mediaTransformer, new MediaContentSerializer(properties));
     }
 
     // ------------------------------------------------------------
@@ -29,9 +31,8 @@ public final class JavaManual
 
     private static final class MediaContentSerializer extends Serializer<MediaContent>
     {
-        public MediaContentSerializer() { super(); }
+        public MediaContentSerializer(SerializerProperties properties) { super(properties); }
 
-        public String getName() { return "java-manual"; }
 
         public MediaContent deserialize(byte[] array) throws IOException {
             return readMediaContent(new DataInputStream(new ByteArrayInputStream(array)));

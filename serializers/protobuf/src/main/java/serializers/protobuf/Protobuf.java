@@ -1,15 +1,23 @@
 package serializers.protobuf;
 
-import static serializers.protobuf.media.MediaContentHolder.*;
+import data.media.MediaTransformer;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import data.media.MediaTransformer;
-
-import serializers.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.BUILD_TIME_CODE_GENERATION;
+import static serializers.core.metadata.SerializerProperties.Features.JSON_CONVERTER;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_ADDITIONAL_LANGUAGES;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_BACKWARD_COMPATIBILITY;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.BUILDER_PATTERN;
+import static serializers.protobuf.media.MediaContentHolder.*;
 
 /**
  *<p>
@@ -19,15 +27,22 @@ import serializers.*;
  */
 public class Protobuf
 {
-    public static void register(TestGroups groups) {
-        groups.media.add(new Transformer(), new PBSerializer(),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.CLASSES_KNOWN,
-                        ""
-                )
-        );
+    public static void register(MediaContentTestGroup groups) {
+
+	    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+	    SerializerProperties properties = builder
+			    .format(BINARY)
+			    .mode(SCHEMA_FIRST)
+			    .apiStyle(BUILD_TIME_CODE_GENERATION)
+			    .valueType(BUILDER_PATTERN)
+			    .feature(JSON_CONVERTER)
+			    .feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+			    .feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+			    .name("protobuf")
+			    .projectURL("https://github.com/google/protobuf/tree/master/java")
+			    .build();
+
+        groups.media.add(new Transformer(), new PBSerializer(properties));
     }
 
     // ------------------------------------------------------------
@@ -35,7 +50,10 @@ public class Protobuf
 
     static final class PBSerializer extends Serializer<MediaContent>
     {
-        public String getName() { return "protobuf"; }
+       public PBSerializer(SerializerProperties properties)
+       {
+       	    super(properties);
+       }
 
         @Override
         public MediaContent deserialize (byte[] array) throws Exception {

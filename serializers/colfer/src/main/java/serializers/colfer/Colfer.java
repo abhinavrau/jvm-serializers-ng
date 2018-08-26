@@ -4,6 +4,7 @@ import data.media.MediaTransformer;
 import serializers.*;
 import serializers.colfer.media.Player;
 import serializers.colfer.media.Size;
+import serializers.core.metadata.SerializerProperties;
 
 import java.nio.BufferOverflowException;
 import java.util.ArrayList;
@@ -11,24 +12,41 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static serializers.core.metadata.SerializerProperties.APIStyle.BUILD_TIME_CODE_GENERATION;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_ADDITIONAL_LANGUAGES;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_BACKWARD_COMPATIBILITY;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
+
 
 public class Colfer {
 
-	public static void register(TestGroups groups) {
-		groups.media.add(new Transformer(), new ColferSerializer(),
-			new SerFeatures(
-				SerFormat.BIN_CROSSLANG,
-				SerGraph.FLAT_TREE,
-				SerClass.CLASSES_KNOWN,
-				"generated code"
-			)
-		);
+	public static void register(MediaContentTestGroup groups) {
+
+
+		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+		SerializerProperties properties = builder.format(BINARY)
+				.apiStyle(BUILD_TIME_CODE_GENERATION)
+				.mode(SCHEMA_FIRST)
+				.valueType(POJO)
+				.feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+				.feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+				.name("colfer")
+				.projectURL("https://github.com/pascaldekloe/colfer")
+				.build();
+
+		groups.media.add(new Transformer(), new ColferSerializer(properties));
 	}
 
 	static final class ColferSerializer extends Serializer<serializers.colfer.media.MediaContent> {
 
 		private byte[] buffer = new byte[1024];
 
+		public ColferSerializer(SerializerProperties properties)
+		{
+			super(properties);
+		}
 
 		@Override
 		public serializers.colfer.media.MediaContent deserialize(byte[] array) throws Exception {
@@ -49,9 +67,6 @@ public class Colfer {
 			}
 		}
 
-		public String getName() {
-			return "colfer";
-		}
 
 	}
 

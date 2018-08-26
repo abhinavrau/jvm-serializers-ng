@@ -1,20 +1,24 @@
 package serializers.scala;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
+import serializers.msgpack.MsgPack;
 
 
-public class MsgPackTest extends CorrectnessCheckHelper {
+public class MsgPackTest  {
 
 
 	@Test
 	public void TestCorrectness() throws Throwable
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
 
 		MsgPack.register(groups);
 
-		runCorrectness(groups);
+		Validator<MediaContent, MediaContent> val =
+				new Validator<>(MediaContent.class, MediaContent.class);
+		val.checkForCorrectness(groups, "data");
 	}
 }

@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
     compile project(':core')
-    compile 'org.mongodb:mongodb-driver:3.6.3'
+    compile 'org.mongodb:mongodb-driver:3.8.0'
     testCompile project (path: ':core', configuration: 'testArchives')
 
 }

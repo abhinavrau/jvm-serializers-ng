@@ -1,20 +1,22 @@
 package serializers.capnproto;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
-
-public class CapnprotoTest extends CorrectnessCheckHelper {
+public class CapnprotoTest {
 
 
 	@Test
 	public void TestCorrectness() throws Exception
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
+		Validator<MediaContent, MediaContent> val =
+				new Validator<>(MediaContent.class, MediaContent.class);
 		CapNProto.register(groups);
 
-		runCorrectness(groups);
+		val.checkForCorrectness(groups, "data");
 	}
 }

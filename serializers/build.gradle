@@ -15,6 +15,7 @@ dependencies {
     compile project('colfer')
     compile project('datakernel')
     compile project('dslplatform')
+    compile project('externalizor')
     compile project('flatbuffers')
     compile project('fst')
     compile project('hessian')

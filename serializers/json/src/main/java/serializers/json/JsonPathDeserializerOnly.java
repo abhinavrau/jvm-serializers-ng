@@ -1,20 +1,24 @@
 package serializers.json;
 
+import com.jayway.jsonpath.JsonPath;
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
-import serializers.*;
-
-import com.jayway.jsonpath.JsonPath;
-
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses JsonPath [http://code.google.com/p/json-path/], with JSONPath parsing.
@@ -22,31 +26,28 @@ import data.media.MediaContent;
  */
 public class JsonPathDeserializerOnly
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(FIELD_BASED)
+            .mode(CODE_FIRST)
+            .valueType(NONE)
+            .name("jsonpath")
+            .projectURL("https://github.com/json-path/JsonPath")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new SemiManualSerializer("json/jsonpath/manual"),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+        new SemiManualSerializer(properties));
   }
 
   static class SemiManualSerializer extends Serializer<MediaContent>
   {
-    private final String name;
 
-    public SemiManualSerializer(String name)
+    public SemiManualSerializer(SerializerProperties properties)
     {
-      this.name = name;
-    }
-
-    public String getName()
-    {
-      return name;
+      super(properties);
     }
 
     public MediaContent deserialize(byte[] array) throws Exception

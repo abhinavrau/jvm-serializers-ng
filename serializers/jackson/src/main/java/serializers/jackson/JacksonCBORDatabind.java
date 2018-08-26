@@ -1,42 +1,54 @@
 package serializers.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.*;
-
-import serializers.JavaBuiltIn;
-import serializers.SerClass;
-import serializers.SerFeatures;
-import serializers.SerFormat;
-import serializers.SerGraph;
-import serializers.TestGroups;
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.*;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 public class JacksonCBORDatabind
 {
-    public static void register(TestGroups groups) { // Jackson Smile defaults: share names, not values
+    public static void register(MediaContentTestGroup groups) { // Jackson Smile defaults: share names, not values
         register(groups, true, false);
     }
 
-    public static void register(TestGroups groups, boolean sharedNames, boolean sharedValues)
+    public static void register(MediaContentTestGroup groups, boolean sharedNames, boolean sharedValues)
     {
         CBORFactory factory = new CBORFactory();
         // no point in using enum names with binary format, so:
         ObjectMapper mapper = new ObjectMapper(factory);
-        groups.media.add(JavaBuiltIn.mediaTransformer,
-                new StdJacksonDataBind<MediaContent>("cbor/serializers.jackson/databind", MediaContent.class, mapper),
-                new SerFeatures(SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.ZERO_KNOWLEDGE,
-                        ""
-                ));
+
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder.format(BINARY)
+                .apiStyle(REFLECTION)
+                .mode(CODE_FIRST)
+                .valueType(POJO)
+                .name("cbor")
+                .feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+                .feature(SUPPORTS_CYCLIC_REFERENCES)
+                .feature(JSON_CONVERTER)
+                .projectURL("https://github.com/FasterXML/jackson-dataformats-binary/tree/master/cbor")
+                .build();
 
         groups.media.add(JavaBuiltIn.mediaTransformer,
-                new JacksonJsonManual("cbor/serializers.jackson/manual", factory),
-                new SerFeatures(SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.MANUAL_OPT,
-                        ""
-                ));
+                new StdJacksonDataBind<MediaContent>(properties, MediaContent.class, mapper));
+
+        SerializerProperties optimized_properties = properties.toBuilder()
+                .apiStyle(FIELD_BASED)
+                .valueType(NONE)
+                .build();
+
+        groups.media.add(JavaBuiltIn.mediaTransformer,
+                new JacksonJsonManual(optimized_properties, factory));
     }
 
 }

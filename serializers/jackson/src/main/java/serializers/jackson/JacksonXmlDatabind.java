@@ -8,6 +8,12 @@ import com.fasterxml.aalto.stax.OutputFactoryImpl;
 import com.fasterxml.jackson.dataformat.xml.*;
 
 import data.media.MediaContent;
+import serializers.core.metadata.SerializerProperties;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.JSON_CONVERTER;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 /**
  * Test for handling XML using "serializers.jackson-xml-databind" codec
@@ -16,19 +22,23 @@ import data.media.MediaContent;
  */
 public class JacksonXmlDatabind
 {
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
         XmlMapper mapper = new XmlMapper(new XmlFactory(
                 new InputFactoryImpl(), new OutputFactoryImpl()));
+
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder.format(SerializerProperties.Format.XML)
+                .apiStyle(REFLECTION)
+                .mode(CODE_FIRST)
+                .valueType(POJO)
+                .name("jackson")
+                .feature(JSON_CONVERTER)
+                .projectURL("https://github.com/FasterXML/jackson-dataformat-xml")
+                .build();
+
         groups.media.add(JavaBuiltIn.mediaTransformer,
-                new StdJacksonDataBind<MediaContent>("xml/serializers.jackson/databind",
-                        MediaContent.class, mapper),
-                new SerFeatures(
-                        SerFormat.XML,
-                        SerGraph.FLAT_TREE,
-                        SerClass.ZERO_KNOWLEDGE,
-                        ""
-                )
-        );
+                new StdJacksonDataBind<>(properties,
+                        MediaContent.class, mapper));
     }
 }

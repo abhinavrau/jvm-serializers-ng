@@ -12,31 +12,45 @@ import io.datakernel.serializer.annotations.Serialize;
 import io.datakernel.serializer.annotations.SerializeNullable;
 import io.datakernel.serializer.annotations.SerializeVarLength;
 import serializers.*;
+import serializers.core.metadata.SerializerProperties;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.RUNTIME_BYTECODE_GENERATION;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO_WITH_ANNOTATIONS;
+import static serializers.core.metadata.SerializerProperties.Features.*;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
 
 public class DataKernelSerializer {
 
-	public static void register(TestGroups groups) {
-		register(groups.media, DataKernelSerializer.mediaTransformer);
+	public static void register(MediaContentTestGroup groups) {
+
+		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+		SerializerProperties properties = builder.format(BINARY)
+				.apiStyle(RUNTIME_BYTECODE_GENERATION)
+				.mode(CODE_FIRST)
+				.valueType(POJO_WITH_ANNOTATIONS)
+				.feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+				.name("datakernel")
+				.projectURL("http://datakernel.io/docs/modules/serializer.html")
+				.build();
+		groups.media.add(DataKernelSerializer.mediaTransformer,  new DefaultSerializer<>(properties));
+
 	}
 
-	private static <T, S> void register(TestGroup<T> group, Transformer<T, S> transformer) {
-		group.add(transformer, new DefaultSerializer<S>(),
-				new SerFeatures(SerFormat.BINARY,
-						SerGraph.FLAT_TREE,
-						SerClass.MANUAL_OPT,
-						"manually optimized"));
-	}
+
 
 	public static class DefaultSerializer<T> extends Serializer<T> {
 		private BufferSerializer<T> serializer;
 		private byte[] array = new byte[20000];
 		SerializationOutputBuffer output = new SerializationOutputBuffer(array);
 
-		public DefaultSerializer() {
+		public DefaultSerializer(SerializerProperties properties) {
+			super(properties);
 			serializer = SerializerBuilder
 					.newDefaultInstance(ClassLoader.getSystemClassLoader())
 					.create(DMediaContent.class);
@@ -57,13 +71,27 @@ public class DataKernelSerializer {
 			return bytes;
 		}
 
-		@Override
-		public String getName() {
-			return "datakernel";
-		}
 	}
 
 	public static class DImage {
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			DImage dImage = (DImage) o;
+			return width == dImage.width &&
+					height == dImage.height &&
+					Objects.equals(uri, dImage.uri) &&
+					Objects.equals(title, dImage.title) &&
+					size == dImage.size;
+		}
+
+		@Override
+		public int hashCode() {
+
+			return Objects.hash(uri, title, width, height, size);
+		}
+
 		public enum Size {
 			SMALL, LARGE
 		}
@@ -98,6 +126,31 @@ public class DataKernelSerializer {
 	}
 
 	public static class DMedia {
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			DMedia dMedia = (DMedia) o;
+			return width == dMedia.width &&
+					height == dMedia.height &&
+					duration == dMedia.duration &&
+					size == dMedia.size &&
+					bitrate == dMedia.bitrate &&
+					hasBitrate == dMedia.hasBitrate &&
+					Objects.equals(uri, dMedia.uri) &&
+					Objects.equals(title, dMedia.title) &&
+					Objects.equals(format, dMedia.format) &&
+					Objects.equals(persons, dMedia.persons) &&
+					player == dMedia.player &&
+					Objects.equals(copyright, dMedia.copyright);
+		}
+
+		@Override
+		public int hashCode() {
+
+			return Objects.hash(uri, title, width, height, format, duration, size, bitrate, hasBitrate, persons, player, copyright);
+		}
+
 		public enum Player {
 			JAVA, FLASH
 		}
@@ -176,6 +229,21 @@ public class DataKernelSerializer {
 		}
 
 		public DMediaContent() {}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			DMediaContent that = (DMediaContent) o;
+			return Objects.equals(DImages, that.DImages) &&
+					Objects.equals(DMedia, that.DMedia);
+		}
+
+		@Override
+		public int hashCode() {
+
+			return Objects.hash(DImages, DMedia);
+		}
 	}
 
 	public static MediaTransformer<DMediaContent> mediaTransformer = new MediaTransformer<DMediaContent>() {

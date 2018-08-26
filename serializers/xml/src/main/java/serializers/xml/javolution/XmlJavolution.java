@@ -1,71 +1,78 @@
-package serializers.xml;
+package serializers.xml.javolution;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import serializers.*;
-
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
 import javolution.text.CharArray;
 import javolution.xml.XMLBinding;
 import javolution.xml.XMLFormat;
 import javolution.xml.XMLObjectReader;
 import javolution.xml.XMLObjectWriter;
 import javolution.xml.stream.XMLStreamException;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
-import data.media.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import static data.media.FieldMapping.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Format.XML;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
-public class XmlJavolution
-{
-    public final static String ROOT_ELEMENT = "mc";
+public class XmlJavolution {
+	public final static String ROOT_ELEMENT = "mc";
 
-	public static void register(TestGroups groups)
-	{
-		groups.media.add(JavaBuiltIn.mediaTransformer, new JavolutionSerializer<>(MediaBinding, MediaContent.class),
-                new SerFeatures(
-                        SerFormat.XML,
-                        SerGraph.FLAT_TREE,
-                        SerClass.MANUAL_OPT,
-                        ""
-                )
-        );
-        // commented-out by dyu: use the non-abbreviated version
+	public static void register(MediaContentTestGroup groups) {
+		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+		SerializerProperties properties = builder
+				.format(XML)
+				.mode(CODE_FIRST)
+				.apiStyle(FIELD_BASED)
+				.valueType(NONE)
+				.name("javolution")
+				.projectURL("https://github.com/javolution/javolution")
+				.build();
+
+		groups.media.add(JavaBuiltIn.mediaTransformer,
+				new JavolutionSerializer(properties, MediaBinding));
+		// commented-out by dyu: use the non-abbreviated version
 		//groups.media.add(JavaBuiltIn.MediaTransformer, new JavolutionSerializer<MediaContent>("-abbrev", MediaBindingAbbreviated, MediaContent.class));
 	}
 
-	private static final class JavolutionSerializer<T> extends Serializer<T>
-	{
-		private final XMLBinding binding;
-		private final Class<T> clazz;
+	private static final class JavolutionSerializer extends Serializer<MediaContent> {
 
-		public JavolutionSerializer(XMLBinding binding, Class<T> clazz)
-		{
-			this.binding = binding;
-			this.clazz = clazz;
+		XMLBinding xmlBinding;
+
+		public JavolutionSerializer(SerializerProperties properties, XMLBinding binding) {
+
+			super(properties);
+			this.xmlBinding = binding;
+
 		}
 
 		@Override
-		public String getName() { return "xml/javolution/manual"; }
+		public MediaContent deserialize(byte[] array) throws Exception {
 
-          @Override
-		public T deserialize(byte[] array) throws Exception
-		{
-			XMLObjectReader reader = XMLObjectReader.newInstance(new ByteArrayInputStream(array)).setBinding(binding);
+			XMLObjectReader reader = XMLObjectReader
+					.newInstance(new ByteArrayInputStream(array)).setBinding(xmlBinding);
 			try {
-				return reader.read(ROOT_ELEMENT, clazz);
+				return reader.read(ROOT_ELEMENT, MediaContent.class);
 			} finally {
 				reader.close();
 			}
 		}
 
-          @Override
-		public byte[] serialize(T content) throws Exception
-		{
+		@Override
+		public byte[] serialize(MediaContent content) throws Exception {
 			ByteArrayOutputStream baos = outputStream();
-			XMLObjectWriter writer = XMLObjectWriter.newInstance(baos).setBinding(binding);
-			writer.write(content, ROOT_ELEMENT, clazz);
+			XMLObjectWriter writer = XMLObjectWriter.newInstance(baos).setBinding(xmlBinding);
+			writer.write(content, ROOT_ELEMENT, MediaContent.class);
 			writer.close();
 			baos.close();
 			return baos.toByteArray();
@@ -103,7 +110,7 @@ public class XmlJavolution
 			return super.getFormat(cls);
 		}
 
-		private final XMLFormat<Image> ImageConverter = new XMLFormat<Image>()
+		private final XMLFormat<Image> ImageConverter = new XMLFormat<Image>(null)
 		{
 			@Override
 			public void write(Image image, XMLFormat.OutputElement xml) throws XMLStreamException
@@ -126,7 +133,7 @@ public class XmlJavolution
 			}
 		};
 
-		private final XMLFormat<Media> MediaConverter = new XMLFormat<Media>()
+		private final XMLFormat<Media> MediaConverter = new XMLFormat<Media>(null)
 		{
 			@Override
 			public void write(Media media, XMLFormat.OutputElement xml) throws XMLStreamException
@@ -171,8 +178,19 @@ public class XmlJavolution
 			}
 		};
 
-		private final XMLFormat<MediaContent> MediaContentConverter = new XMLFormat<MediaContent>()
+		private final XMLFormat<MediaContent> MediaContentConverter = new XMLFormat<MediaContent>(null)
 		{
+
+			@Override
+			public MediaContent newInstance(Class<MediaContent> cls, InputElement xml) throws XMLStreamException {
+				Media media = (Media) xml.getNext();
+				List<Image> images = new ArrayList<Image>();
+				while (xml.hasNext()) {
+					images.add((Image) xml.getNext());
+				}
+				return new MediaContent(media, images);
+			}
+
 			@Override
 			public void write(MediaContent content, XMLFormat.OutputElement xml) throws XMLStreamException
 			{
@@ -182,16 +200,6 @@ public class XmlJavolution
 				}
 			}
 
-			@Override
-			public MediaContent newInstance(java.lang.Class<? extends MediaContent> cls, XMLFormat.InputElement xml) throws XMLStreamException
-			{
-				Media media = xml.getNext();
-				List<Image> images = new ArrayList<Image>();
-				while (xml.hasNext()) {
-					images.add( xml.getNext());
-				}
-				return new MediaContent(media, images);
-			}
 
 			@Override
 			public void read(javolution.xml.XMLFormat.InputElement arg0, MediaContent arg1)
@@ -201,3 +209,4 @@ public class XmlJavolution
 		};
 	};
 }
+

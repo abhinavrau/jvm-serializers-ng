@@ -37,7 +37,7 @@ public final class MediaContent extends Table {
   public static int endMediaContent(FlatBufferBuilder builder) {
     int o = builder.endObject();
     builder.required(o, 4);  // images
-    builder.required(o, 6);  // serializers.media
+    builder.required(o, 6);  // media
     return o;
   }
   public static void finishMediaContentBuffer(FlatBufferBuilder builder, int offset) { builder.finish(offset); }

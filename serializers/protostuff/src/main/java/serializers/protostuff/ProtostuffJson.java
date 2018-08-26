@@ -1,15 +1,24 @@
 package serializers.protostuff;
 
-import static serializers.protostuff.Protostuff.MEDIA_CONTENT_SCHEMA;
-
-import io.protostuff.LinkedBuffer;
 import io.protostuff.JsonIOUtil;
 import io.protostuff.JsonXIOUtil;
+import io.protostuff.LinkedBuffer;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
-
-import serializers.*;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 import serializers.protostuff.media.MediaContent;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.XML_CONVERTER;
+import static serializers.core.metadata.SerializerProperties.Format.JSON;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
+import static serializers.protostuff.Protostuff.MEDIA_CONTENT_SCHEMA;
 
 /**
  * @author David Yu
@@ -19,26 +28,28 @@ import serializers.protostuff.media.MediaContent;
 public final class ProtostuffJson
 {
 
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder
+                .format(JSON)
+                .mode(SCHEMA_FIRST)
+                .apiStyle(FIELD_BASED)
+                .valueType(NONE)
+                .feature(XML_CONVERTER)
+                .name("protostuff")
+                .projectURL("https://protostuff.github.io/docs/")
+                .build();
+
         // manual (hand-coded schema, no autoboxing)
-        groups.media.add(JavaBuiltIn.mediaTransformer, JsonManualMediaSerializer,
-                new SerFeatures(
-                        SerFormat.JSON,
-                        SerGraph.FLAT_TREE,
-                        SerClass.MANUAL_OPT,
-                        "json + manual"
-                )
-        );
+        groups.media.add(JavaBuiltIn.mediaTransformer, new JsonManualMediaSerializer(properties));
+
+        SerializerProperties runtime_properties = properties.toBuilder()
+                .apiStyle(REFLECTION)
+                .valueType(POJO)
+                .build();
         // runtime (reflection)
-        groups.media.add(JavaBuiltIn.mediaTransformer, JsonRuntimeMediaSerializer,
-                new SerFeatures(
-                        SerFormat.JSON,
-                        SerGraph.FLAT_TREE,
-                        SerClass.ZERO_KNOWLEDGE,
-                        "json + reflection"
-                )
-        );
+        groups.media.add(JavaBuiltIn.mediaTransformer, new JsonRuntimeMediaSerializer(runtime_properties));
         
         /* protostuff has too many entries
 
@@ -84,10 +95,14 @@ public final class ProtostuffJson
         */
     }
 
-    public static final Serializer<MediaContent> JsonMediaSerializer = 
-        new Serializer<MediaContent>()
+    // Normal
+    public static class JsonMediaSerializer extends Serializer<MediaContent>
     {
 
+        JsonMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
         public MediaContent deserialize(byte[] array) throws Exception
         {
             MediaContent mc = MediaContent.getDefaultInstance();
@@ -99,17 +114,16 @@ public final class ProtostuffJson
         {
             return JsonIOUtil.toByteArray(content, content.cachedSchema(), false);
         }
-        
-        public String getName()
-        {
-            return "json/protostuff";
-        }
-        
-    };
 
-    public static final Serializer<MediaContent> JsonMediaSerializerNumeric = 
-        new Serializer<MediaContent>()
+    }
+
+    // Numeric
+    public static class JsonMediaSerializerNumeric extends Serializer<MediaContent>
     {
+        JsonMediaSerializerNumeric(SerializerProperties properties)
+        {
+            super(properties);
+        }
 
         final LinkedBuffer buffer = LinkedBuffer.allocate(512);
 
@@ -131,18 +145,16 @@ public final class ProtostuffJson
                 buffer.clear();
             }
         }
-        
-        public String getName()
-        {
-            return "json/protostuff+numeric";
-        }
-        
-    };
 
-    public static final Serializer<data.media.MediaContent> JsonRuntimeMediaSerializer = 
-        new Serializer<data.media.MediaContent>()
+    }
+
+    public static class JsonRuntimeMediaSerializer extends Serializer<data.media.MediaContent>
     {
 
+        JsonRuntimeMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
 	final Schema<data.media.MediaContent> schema = RuntimeSchema.getSchema(data.media.MediaContent.class);
 
         public data.media.MediaContent deserialize(byte[] array) throws Exception
@@ -156,17 +168,15 @@ public final class ProtostuffJson
         {
             return JsonIOUtil.toByteArray(content, schema, false);
         }
-        
-        public String getName()
-        {
-            return "json/protostuff-runtime";
-        }
-        
-    };
+    }
 
-    public static final Serializer<data.media.MediaContent> JsonRuntimeMediaSerializerNumeric = 
-        new Serializer<data.media.MediaContent>()
+    public static class JsonRuntimeMediaSerializerNumeric extends Serializer<data.media.MediaContent>
     {
+
+        JsonRuntimeMediaSerializerNumeric(SerializerProperties properties)
+        {
+            super(properties);
+        }
 
         final LinkedBuffer buffer = LinkedBuffer.allocate(512);
 
@@ -190,18 +200,17 @@ public final class ProtostuffJson
                 buffer.clear();
             }
         }
-        
-        public String getName()
-        {
-            return "json/protostuff-runtime+numeric";
-        }
-        
-    };
 
-    public static final Serializer<data.media.MediaContent> JsonManualMediaSerializer = 
-        new Serializer<data.media.MediaContent>()
+        
+    }
+
+    public static class JsonManualMediaSerializer extends Serializer<data.media.MediaContent>
     {
 
+        JsonManualMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
         public data.media.MediaContent deserialize(byte[] array) throws Exception
         {
             data.media.MediaContent mc = new data.media.MediaContent();
@@ -214,16 +223,15 @@ public final class ProtostuffJson
             return JsonIOUtil.toByteArray(content, MEDIA_CONTENT_SCHEMA, false);
         }
         
-        public String getName()
-        {
-            return "json/protostuff-manual";
-        }
-        
-    };
+    }
 
-    public static final Serializer<data.media.MediaContent> JsonManualMediaSerializerNumeric = 
-        new Serializer<data.media.MediaContent>()
+    public static class JsonManualMediaSerializerNumeric extends Serializer<data.media.MediaContent>
     {
+
+        JsonManualMediaSerializerNumeric(SerializerProperties properties)
+        {
+            super(properties);
+        }
 
         final LinkedBuffer buffer = LinkedBuffer.allocate(512);
 
@@ -246,10 +254,5 @@ public final class ProtostuffJson
             }
         }
         
-        public String getName()
-        {
-            return "json/protostuff-manual+numeric";
-        }
-        
-    };
+    }
 }

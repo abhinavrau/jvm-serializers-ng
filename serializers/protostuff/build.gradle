@@ -19,16 +19,19 @@ configurations {
     protoCompile
 }
 
+ext.protostuffVersion = '1.6.0'
+ext.jacksonVersion = '2.9.5'
+
 dependencies {
     compile project(':core')
 
-    compile 'io.protostuff:protostuff-core:1.6.0'
-    compile 'io.protostuff:protostuff-collectionschema:1.6.0'
-    compile 'io.protostuff:protostuff-json:1.6.0'
-    compile 'io.protostuff:protostuff-runtime:1.6.0'
-    compile 'io.protostuff:protostuff-xml:1.6.0'
-    compile 'io.protostuff:protostuff-compiler:1.6.0'
-    compile 'com.dyuproject.protostuff:protostuff:1.1.3'
+    compile 'io.protostuff:protostuff-core:' +  protostuffVersion
+    compile 'io.protostuff:protostuff-collectionschema:' +  protostuffVersion
+    compile 'io.protostuff:protostuff-json:' +  protostuffVersion
+    compile 'io.protostuff:protostuff-runtime:' +  protostuffVersion
+    compile 'io.protostuff:protostuff-xml:' +  protostuffVersion
+    compile 'com.fasterxml.jackson.core:jackson-core:' + jacksonVersion
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-smile:' + jacksonVersion
     protoCompile "io.protostuff:protostuff-cli:2.2.18"
     testCompile project (path: ':core', configuration: 'testArchives')
 }

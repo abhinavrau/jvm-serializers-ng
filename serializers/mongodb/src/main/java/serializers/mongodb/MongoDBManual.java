@@ -1,39 +1,48 @@
 package serializers.mongodb;
 
-import static data.media.FieldMapping.*;
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import org.bson.*;
+import org.bson.types.BasicBSONList;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.*;
-import org.bson.types.BasicBSONList;
-
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
-import serializers.*;
+import static data.media.FieldMapping.*;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_ADDITIONAL_LANGUAGES;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 public class MongoDBManual
 {
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
-        groups.media.add(JavaBuiltIn.mediaTransformer, new MongoDBSerializer(),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FLAT_TREE,
-                        SerClass.MANUAL_OPT,
-                        "Manual"
-                        )
-                );
+	    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+	    SerializerProperties properties = builder.format(BINARY)
+			    .apiStyle(FIELD_BASED)
+			    .mode(CODE_FIRST)
+			    .valueType(POJO)
+			    .name("mongodb")
+			    .feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+			    .projectURL("http://bsonspec.org/")
+			    .build();
+
+        groups.media.add(JavaBuiltIn.mediaTransformer, new MongoDBSerializer(properties));
     }
 	
     public static final class MongoDBSerializer extends Serializer<MediaContent>
     {
-        @Override
-        public String getName()
-        {
-            return "bson/mongodb/manual";
-        }
+    	MongoDBSerializer(SerializerProperties properties)
+	    {
+	    	super(properties);
+	    }
 		
         @Override
         public byte[] serialize(MediaContent data) throws Exception
@@ -169,7 +178,7 @@ public class MongoDBManual
 						
 					case FIELD_IX_PERSONS:
 						BasicBSONList pl = (BasicBSONList)media.get(name);
-						List<String> persons = new ArrayList<String>();
+						List<String> persons = new ArrayList<>();
 						for (Object o : pl) {
 							persons.add((String)o);
 						}
@@ -188,7 +197,7 @@ public class MongoDBManual
 		}
 		
 		protected List<Image> deserializeImages(BasicBSONList images) {
-			List<Image> r = new ArrayList<Image>();
+			List<Image> r = new ArrayList<>();
 			for (Object o : images) {
 				r.add(deserializeImage((BSONObject)o));
 			}

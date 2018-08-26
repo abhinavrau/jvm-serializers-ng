@@ -1,39 +1,43 @@
 package serializers.xml;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.xml.CompactWriter;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.thoughtworks.xstream.io.xml.XppDriver;
-
 import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
-import data.media.Media.Player;
 import data.media.Image.Size;
+import data.media.Media;
+import data.media.Media.Player;
+import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
-
-import serializers.*;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.thoughtworks.xstream.io.xml.CompactWriter;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Features.JSON_CONVERTER;
+import static serializers.core.metadata.SerializerProperties.Format.XML;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 @SuppressWarnings("rawtypes")
 public class XmlXStream
 {
-	public static void register(TestGroups groups)
+	public static void register(MediaContentTestGroup groups)
 	{
 		// The default XStream serializer.
         // commented-out by dyu: the perf of the default sux.
@@ -45,20 +49,24 @@ public class XmlXStream
 				}
 			}), EmptyConfiguration));*/
 
-		groups.media.add(JavaBuiltIn.mediaTransformer, new ConverterSerializer<MediaContent>("xml/xstream+c",
+		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+		SerializerProperties properties = builder
+				.format(XML)
+				.mode(CODE_FIRST)
+				.apiStyle(FIELD_BASED)
+				.valueType(NONE)
+				.feature(JSON_CONVERTER)
+				.name("xstream")
+				.projectURL("http://x-stream.github.io/")
+				.build();
+
+		groups.media.add(JavaBuiltIn.mediaTransformer, new ConverterSerializer<>(properties,
 			new com.thoughtworks.xstream.XStream(new XppDriver() {
 				public HierarchicalStreamWriter createWriter(Writer out) {
 					//return new PrettyPrintWriter(out, xmlFriendlyReplacer());
 					return new CompactWriter(out, new XmlFriendlyNameCoder());
 				}
-			}), MediaConfiguration),
-                new SerFeatures(
-                        SerFormat.XML,
-                        SerGraph.FLAT_TREE,
-                        SerClass.ZERO_KNOWLEDGE,
-                        ""
-                )
-        );
+			}), MediaConfiguration));
 
         // commented-out by dyu: use the non-abbreviated version
 		/*groups.media.add(JavaBuiltIn.MediaTransformer, new ConverterSerializer<MediaContent>("xml/xstream+c-abbrev",
@@ -69,26 +77,28 @@ public class XmlXStream
 				}
 			}), MediaConfigurationAbbreviated));*/
 
+		SerializerProperties.SerializerPropertiesBuilder builder1 = properties.toBuilder();
+
 		// Adapt each of the STAX handlers to use XStream
 		for (XmlStax.Handler h : XmlStax.HANDLERS) {
 			// TODO: This doesn't work yet.  Need to properly handle optional fields in readMedia/readImage.
             // commented-out by dyu: use the non-abbreviated version (+c) because the perf of the default sux.
 			//groups.media.add(JavaBuiltIn.MediaTransformer, XStream.<MediaContent>mkStaxSerializer(h, "",  EmptyConfiguration));
-			groups.media.add(JavaBuiltIn.mediaTransformer, XmlXStream.<MediaContent>mkStaxSerializer(h, "+c", MediaConfiguration),
-                    new SerFeatures(
-                            SerFormat.XML,
-                            SerGraph.FLAT_TREE,
-                            SerClass.MANUAL_OPT,
-                            ""
-                    )
-            );
+
+			properties = builder1
+					.name("xstream-" + h.name)
+					.relatedSerializer("stax")
+					.build();
+			groups.media.add(JavaBuiltIn.mediaTransformer, XmlXStream.<MediaContent>mkStaxSerializer(properties, h, MediaConfiguration));
 			//groups.media.add(JavaBuiltIn.MediaTransformer, XStream.<MediaContent>mkStaxSerializer(h, "+c-abbrev", MediaConfigurationAbbreviated));
 		}
 	}
 
-	private static <T> ConverterSerializer<T> mkStaxSerializer(final XmlStax.Handler handler, String suffix, Configuration config)
+	private static <T> ConverterSerializer<T> mkStaxSerializer(SerializerProperties properties,
+	                                                           final XmlStax.Handler handler,
+	                                                           Configuration config)
 	{
-		return new ConverterSerializer<T>("xml/xstream" + suffix + "-" + handler.name,
+		return new ConverterSerializer<T>(properties,
 			new com.thoughtworks.xstream.XStream(new StaxDriver() {
 				public XMLInputFactory getInputFactory() { return handler.inFactory; }
 				public XMLOutputFactory getOutputFactory() { return handler.outFactory; }
@@ -97,18 +107,16 @@ public class XmlXStream
 
 	public static final class ConverterSerializer<T> extends Serializer<T>
 	{
-		private String name;
 		private com.thoughtworks.xstream.XStream xstream;
 
-		public ConverterSerializer(String name, com.thoughtworks.xstream.XStream xstream, Configuration config)
+		public ConverterSerializer(SerializerProperties properties,
+		                           com.thoughtworks.xstream.XStream xstream, Configuration config)
 		{
-			this.name = name;
+			super(properties);
 			this.xstream = xstream;
 
 			config.run(xstream);
 		}
-
-		public String getName() { return name; }
 
 		public T deserialize(byte[] array) throws Exception
 		{
@@ -174,7 +182,7 @@ public class XmlXStream
 				Media media = (Media) context.convertAnother(null, Media.class);
 				reader.moveUp();
 
-				List<Image> images = new ArrayList<Image>();
+				List<Image> images = new ArrayList<>();
 				while (reader.hasMoreChildren()) {
 					reader.moveDown();
 					images.add((Image) context.convertAnother(images, Image.class));
@@ -261,7 +269,7 @@ public class XmlXStream
 					media.bitrate = Integer.valueOf(stringBitrate);
 				}
 				media.copyright = reader.getAttribute("copyright");
-				List<String> persons = new ArrayList<String>();
+				List<String> persons = new ArrayList<>();
 				while (reader.hasMoreChildren())
 				{
 					reader.moveDown();
@@ -278,7 +286,7 @@ public class XmlXStream
 				return Media.class.equals(arg0);
 			}
 		}
-	};
+	}
 
 	public static final Configuration MediaConfigurationAbbreviated = new MediaConfigurationAbbreviated();
 	public static class MediaConfigurationAbbreviated extends Configuration
@@ -316,7 +324,7 @@ public class XmlXStream
 				Media media = (Media) context.convertAnother(null, Media.class);
 				reader.moveUp();
 
-				List<Image> images = new ArrayList<Image>();
+				List<Image> images = new ArrayList<>();
 				while (reader.hasMoreChildren()) {
 					reader.moveDown();
 					images.add((Image) context.convertAnother(images, Image.class));
@@ -404,7 +412,7 @@ public class XmlXStream
 					media.bitrate = Integer.valueOf(stringBitrate);
 				}
 				media.copyright = reader.getAttribute("cp");
-				List<String> persons = new ArrayList<String>();
+				List<String> persons = new ArrayList<>();
 				while (reader.hasMoreChildren())
 				{
 					reader.moveDown();

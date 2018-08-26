@@ -1,52 +1,52 @@
 package serializers.json;
 
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import jsonij.json.*;
+import jsonij.json.JSON.Array;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import serializers.*;
-
-import jsonij.json.JPath;
-import jsonij.json.JSON;
-import jsonij.json.JSONMarshaler;
-import jsonij.json.JSONParser;
-import jsonij.json.Value;
-import jsonij.json.JSON.Array;
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses JSONiJ [http://projects.plural.cc/projects/jsonij], with JPath parsing.
  */
 public class JsonijJpath
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(FIELD_BASED)
+            .mode(CODE_FIRST)
+            .valueType(NONE)
+            .name("jsonij")
+            .projectURL("http://projects.plural.cc/projects/jsonij")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new SemiManualSerializer("json/jsonij/manual-jpath"),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+        new SemiManualSerializer(properties));
   }
 
   static class SemiManualSerializer extends Serializer<MediaContent>
   {
-    private final String name;
 
-    public SemiManualSerializer(String name)
+    public SemiManualSerializer(SerializerProperties properties)
     {
-      this.name = name;
-    }
-
-    public String getName()
-    {
-      return name;
+      super(properties);
     }
 
     public MediaContent deserialize(byte[] array) throws Exception

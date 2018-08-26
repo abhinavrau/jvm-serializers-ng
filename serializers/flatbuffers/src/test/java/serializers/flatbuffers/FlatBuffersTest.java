@@ -1,9 +1,10 @@
 package serializers.flatbuffers;
 
+import data.media.MediaContent;
 import org.junit.Test;
 import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
-import serializers.flatbuffers.FlatBuffers;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
 public class FlatBuffersTest extends CorrectnessCheckHelper {
@@ -12,9 +13,13 @@ public class FlatBuffersTest extends CorrectnessCheckHelper {
 	@Test
 	public void TestCorrectness() throws Exception
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
+
+		Validator<MediaContent, MediaContent> val =
+				new Validator<>(MediaContent.class, MediaContent.class);
+
 		FlatBuffers.register(groups);
 
-		runCorrectness(groups);
+		val.checkForCorrectness(groups, "data");
 	}
 }

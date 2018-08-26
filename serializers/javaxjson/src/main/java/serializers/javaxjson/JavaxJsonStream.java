@@ -1,17 +1,22 @@
 package serializers.javaxjson;
 
-import static data.media.FieldMapping.*;
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
 
-import java.io.*;
-import java.util.*;
-
-import javax.json.spi.*;
-import javax.json.stream.*;
+import javax.json.spi.JsonProvider;
+import javax.json.stream.JsonGenerator;
+import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-
-import serializers.*;
-import data.media.*;
+import static data.media.FieldMapping.*;
 
 /**
  * Base class for benchmark using the streaming capabilities of javax.json.
@@ -22,10 +27,11 @@ import data.media.*;
  * Jackson), the only overhead we have here is the mapping between field name
  * and index.
  */
-public abstract class JavaxJsonStream extends Serializer<MediaContent> {
+public class JavaxJsonStream extends Serializer<MediaContent> {
     private final JsonProvider json;
 
-    public JavaxJsonStream(JsonProvider json) {
+    public JavaxJsonStream(SerializerProperties properties, JsonProvider json) {
+        super(properties);
         this.json = json;
     }
 

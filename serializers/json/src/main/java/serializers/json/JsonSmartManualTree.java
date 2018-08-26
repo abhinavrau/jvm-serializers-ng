@@ -1,53 +1,55 @@
 package serializers.json;
 
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import serializers.*;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses json-smart [http://code.google.com/p/json-smart/], with manual tree parsing.
  */
 public class JsonSmartManualTree
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(FIELD_BASED)
+            .mode(CODE_FIRST)
+            .valueType(NONE)
+            .name("json-smart")
+            .projectURL("https://code.google.com/archive/p/json-smart/")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new ManualTreeSerializer("json/json-smart/manual-tree"),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+        new ManualTreeSerializer(properties));
   }
 
   static class ManualTreeSerializer extends Serializer<MediaContent>
   {
-    private final String name;
     private final JSONParser parser;
 
-    public ManualTreeSerializer(String name)
+    public ManualTreeSerializer(SerializerProperties properties)
     {
-      this.name = name;
+      super(properties);
       parser = new JSONParser(JSONParser.MODE_RFC4627);
-    }
-
-    public String getName()
-    {
-      return name;
     }
 
     public MediaContent deserialize(byte[] array) throws Exception
@@ -80,21 +82,20 @@ public class JsonSmartManualTree
         media.hasBitrate = true;
       }
       media.copyright = (String) mediaJsonObject.get("copyright");
-      media.duration = ((Integer) mediaJsonObject.get("duration")).longValue();
+      media.duration = (Long) mediaJsonObject.get("duration");
       media.format = (String) mediaJsonObject.get("format");
-      media.height = ((Integer) mediaJsonObject.get("height")).intValue();
-      List<String> persons = new ArrayList<String>();
+      media.height = (Integer) mediaJsonObject.get("height");
+      List<String> persons = new ArrayList<>();
       JSONArray personsJsonArray = (JSONArray) mediaJsonObject.get("persons");
-      for (int i = 0, size = personsJsonArray.size(); i < size; i++)
-      {
-        persons.add((String) personsJsonArray.get(i));
+      for (Object aPersonsJsonArray : personsJsonArray) {
+        persons.add((String) aPersonsJsonArray);
       }
       media.persons = persons;
       media.player = Media.Player.valueOf((String) mediaJsonObject.get("player"));
-      media.size = ((Integer) mediaJsonObject.get("size")).longValue();
+      media.size = (Long) mediaJsonObject.get("size");
       media.title = (String) mediaJsonObject.get("title");
       media.uri = (String) mediaJsonObject.get("uri");
-      media.width = ((Integer) mediaJsonObject.get("width")).intValue();
+      media.width = (Integer) mediaJsonObject.get("width");
       return media;
     }
     
@@ -116,11 +117,11 @@ public class JsonSmartManualTree
     static Image readImage(JSONParser parser, JSONObject imageJsonObject) throws Exception
     {
       Image image = new Image();
-      image.height = ((Integer) imageJsonObject.get("height")).intValue();
+      image.height = (Integer) imageJsonObject.get("height");
       image.size = Image.Size.valueOf((String) imageJsonObject.get("size"));
       image.title = (String) imageJsonObject.get("title");
       image.uri = (String) imageJsonObject.get("uri");
-      image.width = ((Integer) imageJsonObject.get("width")).intValue();
+      image.width = (Integer) imageJsonObject.get("width");
       return image;
     }
     
@@ -133,7 +134,7 @@ public class JsonSmartManualTree
     static List<Image> readImages(JSONParser parser, JSONArray imagesJsonArray) throws Exception
     {
       int size = imagesJsonArray.size();
-      List<Image> images = new ArrayList<Image> (size);
+      List<Image> images = new ArrayList<> (size);
       for (int i = 0; i < size; i++)
       {
         images.add(readImage(parser, (JSONObject) imagesJsonArray.get(i)));

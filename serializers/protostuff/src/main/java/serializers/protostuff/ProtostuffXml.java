@@ -1,37 +1,48 @@
 package serializers.protostuff;
 
-import static serializers.protostuff.Protostuff.MEDIA_CONTENT_SCHEMA;
-
-import io.protostuff.XmlIOUtil;
 import io.protostuff.Schema;
+import io.protostuff.XmlIOUtil;
 import io.protostuff.runtime.RuntimeSchema;
-
-import serializers.*;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 import serializers.protostuff.media.MediaContent;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.XML_CONVERTER;
+import static serializers.core.metadata.SerializerProperties.Format.XML;
+import static serializers.core.metadata.SerializerProperties.Mode.SCHEMA_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
+import static serializers.protostuff.Protostuff.MEDIA_CONTENT_SCHEMA;
 
 public final class ProtostuffXml
 {
 
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
+        SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+        SerializerProperties properties = builder
+                .format(XML)
+                .mode(SCHEMA_FIRST)
+                .apiStyle(FIELD_BASED)
+                .valueType(NONE)
+                .feature(XML_CONVERTER)
+                .name("protostuff")
+                .projectURL("https://protostuff.github.io/docs/")
+                .build();
+
         // manual (hand-coded schema, no autoboxing)
-        groups.media.add(JavaBuiltIn.mediaTransformer, XmlManualMediaSerializer,
-                new SerFeatures(
-                        SerFormat.XML,
-                        SerGraph.FLAT_TREE,
-                        SerClass.MANUAL_OPT,
-                        ""
-                )
-        );
+        groups.media.add(JavaBuiltIn.mediaTransformer, new XmlManualMediaSerializer(properties));
+
+        SerializerProperties runtime_properties = properties.toBuilder()
+                .apiStyle(REFLECTION)
+                .valueType(POJO)
+                .build();
         // runtime (reflection)
-        groups.media.add(JavaBuiltIn.mediaTransformer, XmlRuntimeMediaSerializer,
-                new SerFeatures(
-                        SerFormat.XML,
-                        SerGraph.FLAT_TREE,
-                        SerClass.ZERO_KNOWLEDGE,
-                        ""
-                )
-        );
+        groups.media.add(JavaBuiltIn.mediaTransformer, new XmlRuntimeMediaSerializer(runtime_properties));
 
         /* protostuff has too many entries
 
@@ -39,10 +50,13 @@ public final class ProtostuffXml
         groups.media.add(Protostuff.MediaTransformer, XmlMediaSerializer);*/
     }
 
-    public static final Serializer<MediaContent> XmlMediaSerializer = 
-        new Serializer<MediaContent>()
+    public static class XmlMediaSerializer extends Serializer<MediaContent>
     {
 
+        XmlMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
         public MediaContent deserialize(byte[] array) throws Exception
         {
             MediaContent mc = MediaContent.getDefaultInstance();
@@ -54,17 +68,16 @@ public final class ProtostuffXml
         {
             return XmlIOUtil.toByteArray(content, content.cachedSchema());
         }
-        
-        public String getName()
-        {
-            return "xml/protostuff";
-        }
-        
-    };
 
-    public static final Serializer<data.media.MediaContent> XmlRuntimeMediaSerializer = 
-        new Serializer<data.media.MediaContent>()
+    }
+
+    public static class XmlRuntimeMediaSerializer extends Serializer<data.media.MediaContent>
     {
+        XmlRuntimeMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
+
 
 	    final Schema<data.media.MediaContent> schema = RuntimeSchema.getSchema(data.media.MediaContent.class);
 
@@ -80,16 +93,15 @@ public final class ProtostuffXml
             return XmlIOUtil.toByteArray(content, schema);
         }
         
-        public String getName()
-        {
-            return "xml/protostuff-runtime";
-        }
-        
-    };
+    }
 
-    public static final Serializer<data.media.MediaContent> XmlManualMediaSerializer = 
-        new Serializer<data.media.MediaContent>()
+    public static class XmlManualMediaSerializer extends Serializer<data.media.MediaContent>
     {
+        XmlManualMediaSerializer(SerializerProperties properties)
+        {
+            super(properties);
+        }
+
 
         public data.media.MediaContent deserialize(byte[] array) throws Exception
         {
@@ -102,11 +114,5 @@ public final class ProtostuffXml
         {
             return XmlIOUtil.toByteArray(content, MEDIA_CONTENT_SCHEMA);
         }
-        
-        public String getName()
-        {
-            return "xml/protostuff-manual";
-        }
-        
-    };
+    }
 }

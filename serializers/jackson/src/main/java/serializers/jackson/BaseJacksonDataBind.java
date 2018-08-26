@@ -1,12 +1,17 @@
 package serializers.jackson;
 
-import java.io.*;
-
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public abstract class BaseJacksonDataBind<T> extends BaseJacksonDriver<T>
 {
@@ -15,19 +20,19 @@ public abstract class BaseJacksonDataBind<T> extends BaseJacksonDriver<T>
     protected final ObjectReader reader;
     protected final ObjectWriter writer;
 
-    protected BaseJacksonDataBind(String name, Class<T> clazz, ObjectMapper mapper)
+    protected BaseJacksonDataBind(SerializerProperties properties, Class<T> clazz, ObjectMapper mapper)
     {
-        super(name);
+        super(properties);
         type = mapper.getTypeFactory().constructType(clazz);
         this.mapper = mapper;
         reader = mapper.readerFor(type);
         writer = mapper.writerFor(type);
     }
 
-    protected BaseJacksonDataBind(String name, JavaType type,
+    protected BaseJacksonDataBind(SerializerProperties properties, JavaType type,
             ObjectMapper mapper, ObjectReader reader, ObjectWriter writer)
     {
-        super(name);
+        super(properties);
         this.type = type;
         this.mapper = mapper;
         this.reader = reader;

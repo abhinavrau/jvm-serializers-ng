@@ -1,16 +1,16 @@
 package serializers.xml;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import data.media.MediaContent;
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-
-import serializers.Serializer;
-import data.media.MediaContent;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public abstract class BaseStaxMediaSerializer extends Serializer<MediaContent>
 {
@@ -18,8 +18,9 @@ public abstract class BaseStaxMediaSerializer extends Serializer<MediaContent>
 
     private final StaxDeserializer _deserializer;
     
-    protected BaseStaxMediaSerializer(boolean workingGetElementText)
+    protected BaseStaxMediaSerializer(SerializerProperties properties, boolean workingGetElementText)
     {
+        super(properties);
         _deserializer = new StaxDeserializer(workingGetElementText);
     }
     

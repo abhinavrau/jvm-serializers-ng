@@ -25,11 +25,12 @@ public final class Media extends Table {
   public long duration() { int o = __offset(14); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
   public long size() { int o = __offset(16); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
   public int bitrate() { int o = __offset(18); return o != 0 ? bb.getInt(o + bb_pos) : 0; }
-  public String persons(int j) { int o = __offset(20); return o != 0 ? __string(__vector(o) + j * 4) : null; }
-  public int personsLength() { int o = __offset(20); return o != 0 ? __vector_len(o) : 0; }
-  public byte player() { int o = __offset(22); return o != 0 ? bb.get(o + bb_pos) : 0; }
-  public String copyright() { int o = __offset(24); return o != 0 ? __string(o + bb_pos) : null; }
-  public ByteBuffer copyrightAsByteBuffer() { return __vector_as_bytebuffer(24, 1); }
+  public boolean hasBitrate() { int o = __offset(20); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  public String persons(int j) { int o = __offset(22); return o != 0 ? __string(__vector(o) + j * 4) : null; }
+  public int personsLength() { int o = __offset(22); return o != 0 ? __vector_len(o) : 0; }
+  public byte player() { int o = __offset(24); return o != 0 ? bb.get(o + bb_pos) : 0; }
+  public String copyright() { int o = __offset(26); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer copyrightAsByteBuffer() { return __vector_as_bytebuffer(26, 1); }
 
   public static int createMedia(FlatBufferBuilder builder,
       int uriOffset,
@@ -40,10 +41,11 @@ public final class Media extends Table {
       long duration,
       long size,
       int bitrate,
+      boolean hasBitrate,
       int personsOffset,
       byte player,
       int copyrightOffset) {
-    builder.startObject(11);
+    builder.startObject(12);
     Media.addSize(builder, size);
     Media.addDuration(builder, duration);
     Media.addCopyright(builder, copyrightOffset);
@@ -55,10 +57,11 @@ public final class Media extends Table {
     Media.addTitle(builder, titleOffset);
     Media.addUri(builder, uriOffset);
     Media.addPlayer(builder, player);
+    Media.addHasBitrate(builder, hasBitrate);
     return Media.endMedia(builder);
   }
 
-  public static void startMedia(FlatBufferBuilder builder) { builder.startObject(11); }
+  public static void startMedia(FlatBufferBuilder builder) { builder.startObject(12); }
   public static void addUri(FlatBufferBuilder builder, int uriOffset) { builder.addOffset(0, uriOffset, 0); }
   public static void addTitle(FlatBufferBuilder builder, int titleOffset) { builder.addOffset(1, titleOffset, 0); }
   public static void addWidth(FlatBufferBuilder builder, int width) { builder.addInt(2, width, 0); }
@@ -67,16 +70,17 @@ public final class Media extends Table {
   public static void addDuration(FlatBufferBuilder builder, long duration) { builder.addLong(5, duration, 0L); }
   public static void addSize(FlatBufferBuilder builder, long size) { builder.addLong(6, size, 0L); }
   public static void addBitrate(FlatBufferBuilder builder, int bitrate) { builder.addInt(7, bitrate, 0); }
-  public static void addPersons(FlatBufferBuilder builder, int personsOffset) { builder.addOffset(8, personsOffset, 0); }
+  public static void addHasBitrate(FlatBufferBuilder builder, boolean hasBitrate) { builder.addBoolean(8, hasBitrate, false); }
+  public static void addPersons(FlatBufferBuilder builder, int personsOffset) { builder.addOffset(9, personsOffset, 0); }
   public static int createPersonsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startPersonsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addPlayer(FlatBufferBuilder builder, byte player) { builder.addByte(9, player, 0); }
-  public static void addCopyright(FlatBufferBuilder builder, int copyrightOffset) { builder.addOffset(10, copyrightOffset, 0); }
+  public static void addPlayer(FlatBufferBuilder builder, byte player) { builder.addByte(10, player, 0); }
+  public static void addCopyright(FlatBufferBuilder builder, int copyrightOffset) { builder.addOffset(11, copyrightOffset, 0); }
   public static int endMedia(FlatBufferBuilder builder) {
     int o = builder.endObject();
     builder.required(o, 4);  // uri
     builder.required(o, 12);  // format
-    builder.required(o, 20);  // persons
+    builder.required(o, 22);  // persons
     return o;
   }
 }

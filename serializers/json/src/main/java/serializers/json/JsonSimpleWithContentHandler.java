@@ -1,57 +1,61 @@
 package serializers.json;
 
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ContentHandler;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ContentHandler;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import serializers.*;
-
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses JSON.simple [http://code.google.com/p/json-simple/], with manual parsing with a ContentHandler.
  */
 public class JsonSimpleWithContentHandler
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(FIELD_BASED)
+            .mode(CODE_FIRST)
+            .valueType(NONE)
+            .name("json-simple")
+            .feature(SerializerProperties.Features.OPTIMIZED)
+            .optimizedDescription("use of ContentHandler")
+            .projectURL("http://code.google.com/p/json-simple")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new SemiManualSerializer("json/json.simple/manual"),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+        new SemiManualSerializer(properties));
   }
 
   static class SemiManualSerializer extends Serializer<MediaContent>
   {
-    private final String name;
     private final JSONParser parser;
     private final MediaContentTransformer transformer;
 
-    public SemiManualSerializer(String name)
+    public SemiManualSerializer(SerializerProperties properties)
     {
-      this.name = name;
+      super(properties);
       this.parser = new JSONParser();
       this.transformer = new MediaContentTransformer();
-    }
-
-    public String getName()
-    {
-      return name;
     }
 
     public MediaContent deserialize(byte[] array) throws Exception
@@ -135,7 +139,7 @@ public class JsonSimpleWithContentHandler
     
     private static class MediaContentTransformer implements ContentHandler
     {
-      private static enum State
+      private  enum State
       {
         INIT, READING_MEDIA_CONTENT, FINAL, 
         READING_MEDIA, 
@@ -300,7 +304,7 @@ public class JsonSimpleWithContentHandler
       private static long readLong(Object value)
       {
         if (value == null) return 0;
-        return ((Long) value).longValue();
+        return (Long) value;
       }
       
       private static String readString(Object value)

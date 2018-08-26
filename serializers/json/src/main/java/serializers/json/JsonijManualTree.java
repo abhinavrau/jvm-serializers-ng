@@ -1,50 +1,55 @@
 package serializers.json;
 
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import jsonij.json.JSON;
+import jsonij.json.JSONMarshaler;
+import jsonij.json.JSONParser;
+import jsonij.json.Value;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import serializers.*;
-
-import jsonij.json.JSON;
-import jsonij.json.JSONMarshaler;
-import jsonij.json.JSONParser;
-import jsonij.json.Value;
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses JSONiJ [http://projects.plural.cc/projects/jsonij], with manual tree processing.
  */
 public class JsonijManualTree
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(FIELD_BASED)
+            .mode(CODE_FIRST)
+            .valueType(NONE)
+            .name("jsonij")
+            .feature(SerializerProperties.Features.OPTIMIZED)
+            .optimizedDescription("tree")
+            .projectURL("http://projects.plural.cc/projects/jsonij")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new ManualTreeSerializer("json/jsonij/manual-tree"),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+        new ManualTreeSerializer(properties));
   }
 
   static class ManualTreeSerializer extends Serializer<MediaContent>
   {
-    private final String name;
 
-    public ManualTreeSerializer(String name)
+    public ManualTreeSerializer(SerializerProperties properties)
     {
-      this.name = name;
-    }
-
-    public String getName()
-    {
-      return name;
+      super(properties);
     }
 
     public MediaContent deserialize(byte[] array) throws Exception

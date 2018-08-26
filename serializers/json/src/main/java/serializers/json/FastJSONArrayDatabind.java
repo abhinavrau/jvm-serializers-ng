@@ -1,47 +1,53 @@
 package serializers.json;
 
-import java.io.*;
-
-import serializers.*;
-
-import data.media.MediaContent;
-
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.JSONSerializer;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.SerializeWriter;
-import com.alibaba.fastjson.serializer.SerializeFilter;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 /**
  * This serializer uses FastJSON [https://github.com/alibaba/fastjson] for JSON data binding.
  */
 public class FastJSONArrayDatabind
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(REFLECTION)
+            .mode(CODE_FIRST)
+            .valueType(POJO)
+            .name("fastjson")
+            .feature(SerializerProperties.Features.OPTIMIZED)
+            .optimizedDescription("array")
+            .projectURL("https://github.com/alibaba/fastjson")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new GenericSerializer<MediaContent>("json-array/fastjson/databind", MediaContent.class),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.ZERO_KNOWLEDGE,
-                    ""
-            )
-    );
+        new GenericSerializer<MediaContent>(properties, MediaContent.class));
   }
 
   static class GenericSerializer<T> extends Serializer<T>
   {
-    private final String name;
     private final Class<T> type;
 
     private int serializerFeatures;
 
-    public GenericSerializer(String name, Class<T> clazz)
+    public GenericSerializer(SerializerProperties properties, Class<T> clazz)
     {
-      this.name = name;
+      super(properties);
       type = clazz;
 
       serializerFeatures |= SerializerFeature.QuoteFieldNames.getMask();
@@ -51,11 +57,6 @@ public class FastJSONArrayDatabind
       serializerFeatures |= SerializerFeature.BeanToArray.getMask();
     }
 
-    @Override
-    public String getName()
-    {
-      return name;
-    }
 
     public void serializeItems(T[] items, OutputStream out) throws IOException
     {

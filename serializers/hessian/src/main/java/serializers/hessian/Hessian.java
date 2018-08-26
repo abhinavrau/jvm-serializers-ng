@@ -1,26 +1,39 @@
 package serializers.hessian;
 
+import com.caucho.hessian.io.Hessian2StreamingInput;
+import com.caucho.hessian.io.Hessian2StreamingOutput;
+import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.*;
 import java.lang.reflect.Array;
 
-import data.media.MediaContent;
-
-import com.caucho.hessian.io.*;
-
-import serializers.*;
-import serializers.Serializer;
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_ADDITIONAL_LANGUAGES;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_CYCLIC_REFERENCES;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 public class Hessian
 {
-    public static void register(TestGroups groups)
+    public static void register(MediaContentTestGroup groups)
     {
-        groups.media.add(JavaBuiltIn.mediaTransformer, new HessianSerializer<MediaContent>(MediaContent.class),
-                new SerFeatures(
-                        SerFormat.BIN_CROSSLANG,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.ZERO_KNOWLEDGE,""
-                ) 
-        );
+	    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+	    SerializerProperties properties = builder.format(BINARY)
+			    .apiStyle(REFLECTION)
+			    .mode(CODE_FIRST)
+			    .valueType(POJO)
+			    .name("hessian")
+			    .feature(SUPPORTS_ADDITIONAL_LANGUAGES)
+			    .feature(SUPPORTS_CYCLIC_REFERENCES)
+			    .projectURL("http://hessian.caucho.com/")
+			    .build();
+
+        groups.media.add(JavaBuiltIn.mediaTransformer, new HessianSerializer<MediaContent>(properties, MediaContent.class));
     }
 
     // ------------------------------------------------------------
@@ -30,9 +43,8 @@ public class Hessian
 	{
 	    private final Class<T> clz;
 	    
-	    public HessianSerializer(Class<T> c) { clz = c; }
-	    
-            public String getName() { return "hessian"; }
+	    public HessianSerializer(SerializerProperties properties, Class<T> c) {  super(properties); clz = c; }
+
 
             @SuppressWarnings("unchecked")
             public T deserialize(byte[] array) throws Exception

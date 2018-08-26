@@ -1,20 +1,24 @@
 package serializers.thrift;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
+import serializers.MediaContentTestGroup;
 import serializers.Thrift;
+import serializers.core.Validator;
 
 
-public class ThriftTest extends CorrectnessCheckHelper {
+public class ThriftTest {
 
 
 	@Test
 	public void TestCorrectness() throws Exception
 	{
-		TestGroups groups = new TestGroups();
+		MediaContentTestGroup groups = new MediaContentTestGroup();
 		Thrift.register(groups);
 
-		runCorrectness(groups);
+		Validator<MediaContent,MediaContent> val = new Validator<>(data.media.MediaContent.class,
+				MediaContent.class);
+
+		val.checkForCorrectness(groups, "data");
 	}
 }

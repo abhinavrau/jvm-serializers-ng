@@ -1,4 +1,5 @@
 rootProject.name = 'jvm-serializers-ng'
+enableFeaturePreview('STABLE_PUBLISHING')
 include 'core'
 include 'serializers:avro'
 include 'serializers:jackson'
@@ -24,6 +25,7 @@ include 'serializers:stephenerialization'
 include 'serializers:thrift'
 include 'serializers:wobly'
 include 'serializers:xml'
-include 'runner'
+//include 'runner'
 include 'cli'
+include 'benchmark'
 

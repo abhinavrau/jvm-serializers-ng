@@ -14,11 +14,13 @@ buildscript {
     }
 }
 
+ext.protobufVersion = '3.5.1'
 
 dependencies {
     compile project(':core')
 
-    compile 'com.google.protobuf:protobuf-java:3.5.1'
+    compile 'com.google.protobuf:protobuf-java:' + protobufVersion
+    compile 'com.google.protobuf:protobuf-java-util:' + protobufVersion
     testCompile project (path: ':core', configuration: 'testArchives')
 }
 

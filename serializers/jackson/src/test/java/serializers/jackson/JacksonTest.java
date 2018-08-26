@@ -1,18 +1,20 @@
 package serializers.jackson;
 
+import data.media.MediaContent;
 import org.junit.Test;
-import serializers.CorrectnessCheckHelper;
-import serializers.TestGroups;
-import serializers.avro.AvroGeneric;
+import serializers.MediaContentTestGroup;
+import serializers.core.Validator;
 
 
-public class JacksonTest extends CorrectnessCheckHelper {
+public class JacksonTest {
 
 
 	@Test
 	public void TestCorrectness() throws Throwable
 	{
-		TestGroups groups = new TestGroups();
+		Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class, MediaContent.class);
+
+		MediaContentTestGroup groups = new MediaContentTestGroup();
 
 		//Binary
 		JacksonAvroDatabind.register(groups);
@@ -37,6 +39,6 @@ public class JacksonTest extends CorrectnessCheckHelper {
 		// XML
 		JacksonXmlDatabind.register(groups);
 
-		runCorrectness(groups);
+		val.checkForCorrectness(groups,"data");
 	}
 }

@@ -1,53 +1,53 @@
 package serializers.json;
 
+import com.google.gson.*;
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import serializers.*;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
-
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
 /**
  * Driver that uses Gson for manual tree processing.
  */
 public class JsonGsonTree
 {
-  public static void register(TestGroups groups)
+  public static void register(MediaContentTestGroup groups)
   {
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder
+            .format(SerializerProperties.Format.JSON)
+            .apiStyle(FIELD_BASED)
+            .mode(CODE_FIRST)
+            .valueType(NONE)
+            .name("gson")
+            .feature(SerializerProperties.Features.OPTIMIZED)
+            .optimizedDescription("tree")
+            .projectURL("https://github.com/google/gson")
+            .build();
+
     groups.media.add(JavaBuiltIn.mediaTransformer,
-        new SemiManualSerializer("json/gson/manual-tree"),
-            new SerFeatures(
-                    SerFormat.JSON,
-                    SerGraph.FLAT_TREE,
-                    SerClass.MANUAL_OPT,
-                    ""
-            )
-    );
+        new SemiManualSerializer(properties));
   }
 
   static class SemiManualSerializer extends Serializer<MediaContent>
   {
-    private final String name;
     private final JsonParser parser = new JsonParser();
 
-    public SemiManualSerializer(String name)
+    public SemiManualSerializer(SerializerProperties properties)
     {
-      this.name = name;
-    }
-
-    public String getName()
-    {
-      return name;
+      super(properties);
     }
 
     public MediaContent deserialize(byte[] array) throws Exception

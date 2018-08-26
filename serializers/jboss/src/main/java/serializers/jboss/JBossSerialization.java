@@ -1,33 +1,38 @@
 package serializers.jboss;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Array;
-
+import data.media.MediaContent;
 import org.jboss.serial.io.JBossObjectInputStream;
 import org.jboss.serial.io.JBossObjectOutputStream;
 import org.jboss.serial.util.StringUtilBuffer;
+import serializers.JavaBuiltIn;
+import serializers.Serializer;
+import serializers.MediaContentTestGroup;
+import serializers.core.metadata.SerializerProperties;
 
-import data.media.MediaContent;
-import serializers.*;
+import java.io.*;
+import java.lang.reflect.Array;
+
+import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY_JDK_COMPATIBLE;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
 public class JBossSerialization {
 
-	public static void register(final TestGroups groups) {
-        groups.media.add(
+	public static void register(final MediaContentTestGroup groups) {
+
+		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+		SerializerProperties properties = builder.format(BINARY_JDK_COMPATIBLE)
+				.apiStyle(REFLECTION)
+				.mode(CODE_FIRST)
+				.valueType(POJO)
+				.name("jboss-serialization")
+				.projectURL("http://serialization.jboss.org/")
+				.build();
+
+		groups.media.add(
     		JavaBuiltIn.mediaTransformer,
-    		new JBossSerializationSerializer<MediaContent>(MediaContent.class)
-                ,
-                new SerFeatures(
-                        SerFormat.BINARY,
-                        SerGraph.FULL_GRAPH,
-                        SerClass.ZERO_KNOWLEDGE,
-                        ""
-                )
-        );
+    		new JBossSerializationSerializer<MediaContent>(properties, MediaContent.class));
     }
 
 	private static final class JBossSerializationSerializer<T>
@@ -35,14 +40,11 @@ public class JBossSerialization {
 
 		private final Class<T> clz;
 
-	    public JBossSerializationSerializer(final Class<T> c) {
+	    public JBossSerializationSerializer(SerializerProperties properties, final Class<T> c) {
+	    	super(properties);
 	    	clz = c;
     	}
 
-        @Override
-		public String getName() {
-        	return "jboss-serialization";
-    	}
 
         @Override
 		@SuppressWarnings("unchecked")

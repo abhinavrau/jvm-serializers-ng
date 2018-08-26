@@ -1,5 +1,7 @@
 package serializers;
 
+import serializers.core.metadata.SerializerProperties;
+
 import java.io.*;
 
 public abstract class Serializer<S>
@@ -13,22 +15,31 @@ public abstract class Serializer<S>
     
 	public abstract S deserialize(byte[] array) throws Exception;
 	public abstract byte[] serialize(S content) throws Exception;
- 	public abstract String getName();
-    
-    SerFeatures features = new SerFeatures(); // ruediger: everything misc by default.
-    
+
+	public Serializer(SerializerProperties properties)
+	{
+		this.serializerProperties = properties;
+	}
+ 	public final String getName()
+    {
+    	return serializerProperties.getName();
+    }
+
+	public  SerializerProperties getProperties()
+	{
+		return serializerProperties;
+	}
+
+	SerializerProperties serializerProperties;
+
+	public  void setProperties(SerializerProperties properties)
+	{
+		this.serializerProperties = properties;
+	}
+
 	public ByteArrayOutputStream outputStream () {
 		return new ByteArrayOutputStream(BUFFER_SIZE);
 	}
-
-    public SerFeatures getFeatures() {
-        return features;
-    }
-
-    public void setFeatures(SerFeatures features) {
-        this.features = features;
-    }
-
 
  	// Multi-item interfaces
  	
@@ -52,5 +63,6 @@ public abstract class Serializer<S>
 	public ByteArrayOutputStream outputStreamForList (S[] items) {
 		return new ByteArrayOutputStream(BUFFER_SIZE * items.length);
 	}
+
 
 }
