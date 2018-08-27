@@ -82,20 +82,21 @@ public class JsonSmartManualTree
         media.hasBitrate = true;
       }
       media.copyright = (String) mediaJsonObject.get("copyright");
-      media.duration = (Long) mediaJsonObject.get("duration");
+      media.duration = ((Integer) mediaJsonObject.get("duration")).longValue();
       media.format = (String) mediaJsonObject.get("format");
-      media.height = (Integer) mediaJsonObject.get("height");
-      List<String> persons = new ArrayList<>();
+      media.height = ((Integer) mediaJsonObject.get("height")).intValue();
+      List<String> persons = new ArrayList<String>();
       JSONArray personsJsonArray = (JSONArray) mediaJsonObject.get("persons");
-      for (Object aPersonsJsonArray : personsJsonArray) {
-        persons.add((String) aPersonsJsonArray);
+      for (int i = 0, size = personsJsonArray.size(); i < size; i++)
+      {
+        persons.add((String) personsJsonArray.get(i));
       }
       media.persons = persons;
       media.player = Media.Player.valueOf((String) mediaJsonObject.get("player"));
-      media.size = (Long) mediaJsonObject.get("size");
+      media.size = ((Integer) mediaJsonObject.get("size")).longValue();
       media.title = (String) mediaJsonObject.get("title");
       media.uri = (String) mediaJsonObject.get("uri");
-      media.width = (Integer) mediaJsonObject.get("width");
+      media.width = ((Integer) mediaJsonObject.get("width")).intValue();
       return media;
     }
     
@@ -117,11 +118,11 @@ public class JsonSmartManualTree
     static Image readImage(JSONParser parser, JSONObject imageJsonObject) throws Exception
     {
       Image image = new Image();
-      image.height = (Integer) imageJsonObject.get("height");
+      image.height = ((Integer) imageJsonObject.get("height")).intValue();
       image.size = Image.Size.valueOf((String) imageJsonObject.get("size"));
       image.title = (String) imageJsonObject.get("title");
       image.uri = (String) imageJsonObject.get("uri");
-      image.width = (Integer) imageJsonObject.get("width");
+      image.width = ((Integer) imageJsonObject.get("width")).intValue();
       return image;
     }
     
@@ -134,7 +135,7 @@ public class JsonSmartManualTree
     static List<Image> readImages(JSONParser parser, JSONArray imagesJsonArray) throws Exception
     {
       int size = imagesJsonArray.size();
-      List<Image> images = new ArrayList<> (size);
+      List<Image> images = new ArrayList<Image> (size);
       for (int i = 0; i < size; i++)
       {
         images.add(readImage(parser, (JSONObject) imagesJsonArray.get(i)));

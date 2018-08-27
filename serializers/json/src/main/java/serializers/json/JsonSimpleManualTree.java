@@ -118,11 +118,11 @@ public class JsonSimpleManualTree
     static Image readImage(JSONParser parser, JSONObject imageJsonObject) throws Exception
     {
       Image image = new Image();
-      image.height = (Integer) imageJsonObject.get("height");
+      image.height = ((Long) imageJsonObject.get("height")).intValue();
       image.size = Image.Size.valueOf((String) imageJsonObject.get("size"));
       image.title = (String) imageJsonObject.get("title");
       image.uri = (String) imageJsonObject.get("uri");
-      image.width = (Integer) imageJsonObject.get("width");
+      image.width = ((Long) imageJsonObject.get("width")).intValue();
       return image;
     }
 
@@ -136,8 +136,9 @@ public class JsonSimpleManualTree
     {
       int size = imagesJsonArray.size();
       List<Image> images = new ArrayList<Image>(size);
-      for (Object anImagesJsonArray : imagesJsonArray) {
-        images.add(readImage(parser, (JSONObject) anImagesJsonArray));
+      for (int i = 0; i < size; i++)
+      {
+        images.add(readImage(parser, (JSONObject) imagesJsonArray.get(i)));
       }
       return images;
     }
