@@ -9,16 +9,14 @@ import serializers.core.Validator;
 public class HessianTest {
 
 
-	@Test
-	public void TestCorrectness() throws Exception
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
+  @Test
+  public void TestCorrectness() throws Exception {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
 
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
 
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
-
-		Hessian.register(groups);
-		val.checkForCorrectness(groups, "data");
-	}
+    Hessian.register(groups);
+    val.checkForCorrectness(groups, "data");
+  }
 }

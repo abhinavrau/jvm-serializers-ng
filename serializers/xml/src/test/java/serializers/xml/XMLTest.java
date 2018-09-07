@@ -10,24 +10,23 @@ import serializers.xml.javolution.XmlJavolution;
 public class XMLTest {
 
 
-	@Test
-	public void TestCorrectness() throws Exception
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
+  @Test
+  public void TestCorrectness() throws Exception {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
 
-		ExiExificient.register(groups);
-		Jaxb.register(groups);
-		JaxbAalto.register(groups);
-		XmlJavolution.register(groups);
-		XmlXStream.register(groups);
+    ExiExificient.register(groups);
+    Jaxb.register(groups);
+    JaxbAalto.register(groups);
+    XmlJavolution.register(groups);
+    XmlXStream.register(groups);
 
-		//TODO: XmlStax does not like media.2.json since it has nulls
-		//XmlStax.register(groups, true, true, true);
+    //TODO: XmlStax does not like media.2.json since it has nulls
+    //XmlStax.register(groups, true, true, true);
 
-		Validator<MediaContent,MediaContent> val = new Validator<>(MediaContent.class,
-				MediaContent.class);
+    Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class,
+        MediaContent.class);
 
-		val.checkForCorrectness(groups, "data");
+    val.checkForCorrectness(groups, "data");
 
-	}
+  }
 }

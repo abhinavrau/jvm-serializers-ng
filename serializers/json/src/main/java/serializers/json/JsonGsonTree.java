@@ -1,77 +1,74 @@
 package serializers.json;
 
-import com.google.gson.*;
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
-import serializers.JavaBuiltIn;
-import serializers.Serializer;
-import serializers.MediaContentTestGroup;
-import serializers.core.metadata.SerializerProperties;
-
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-
 import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
 import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
 import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+import serializers.JavaBuiltIn;
+import serializers.MediaContentTestGroup;
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
+
 /**
  * Driver that uses Gson for manual tree processing.
  */
-public class JsonGsonTree
-{
-  public static void register(MediaContentTestGroup groups)
-  {
+public class JsonGsonTree {
+
+  public static void register(MediaContentTestGroup groups) {
     SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
     SerializerProperties properties = builder
-            .format(SerializerProperties.Format.JSON)
-            .apiStyle(FIELD_BASED)
-            .mode(CODE_FIRST)
-            .valueType(NONE)
-            .name("gson")
-            .feature(SerializerProperties.Features.OPTIMIZED)
-            .optimizedDescription("tree")
-            .projectURL("https://github.com/google/gson")
-            .build();
+        .format(SerializerProperties.Format.JSON)
+        .apiStyle(FIELD_BASED)
+        .mode(CODE_FIRST)
+        .valueType(NONE)
+        .name("gson")
+        .feature(SerializerProperties.Features.OPTIMIZED)
+        .optimizedDescription("tree")
+        .projectUrl("https://github.com/google/gson")
+        .build();
 
     groups.media.add(JavaBuiltIn.mediaTransformer,
         new SemiManualSerializer(properties));
   }
 
-  static class SemiManualSerializer extends Serializer<MediaContent>
-  {
+  static class SemiManualSerializer extends Serializer<MediaContent> {
+
     private final JsonParser parser = new JsonParser();
 
-    public SemiManualSerializer(SerializerProperties properties)
-    {
+    public SemiManualSerializer(SerializerProperties properties) {
       super(properties);
     }
 
-    public MediaContent deserialize(byte[] array) throws Exception
-    {
+    public MediaContent deserialize(byte[] array) throws Exception {
       String mediaContentJsonInput = new String(array, "UTF-8");
       return readMediaContent(parser, mediaContentJsonInput);
     }
 
-    public byte[] serialize(MediaContent mediaContent) throws Exception
-    {
+    public byte[] serialize(MediaContent mediaContent) throws Exception {
       StringWriter writer = new StringWriter();
       writeMediaContent(writer, mediaContent);
       writer.flush();
       return writer.toString().getBytes("UTF-8");
     }
 
-    private static Image readImage(JsonParser parser, String imageJsonInput)
-    {
+    private static Image readImage(JsonParser parser, String imageJsonInput) {
       JsonObject imageJsonObject = parser.parse(imageJsonInput).getAsJsonObject();
       return readImage(imageJsonObject);
     }
 
-    private static Image readImage(JsonObject imageJsonObject)
-    {
+    private static Image readImage(JsonObject imageJsonObject) {
       Image image = new Image();
       image.height = imageJsonObject.get("height").getAsInt();
       image.size = Image.Size.valueOf(imageJsonObject.get("size").getAsString());
@@ -81,8 +78,8 @@ public class JsonGsonTree
       return image;
     }
 
-    private static MediaContent readMediaContent(JsonParser parser, String mediaContentJsonInput) throws Exception
-    {
+    private static MediaContent readMediaContent(JsonParser parser, String mediaContentJsonInput)
+        throws Exception {
       JsonObject mediaContentJsonObject = parser.parse(mediaContentJsonInput).getAsJsonObject();
       MediaContent mediaContent = new MediaContent();
       mediaContent.images = readImages(mediaContentJsonObject.get("images").getAsJsonArray());
@@ -90,24 +87,20 @@ public class JsonGsonTree
       return mediaContent;
     }
 
-    private static Media readMedia(JsonParser parser, String mediaJsonInput)
-    {
+    private static Media readMedia(JsonParser parser, String mediaJsonInput) {
       JsonObject mediaJsonObject = parser.parse(mediaJsonInput).getAsJsonObject();
       return readMedia(mediaJsonObject);
     }
 
-    private static Media readMedia(JsonObject mediaJsonObject)
-    {
+    private static Media readMedia(JsonObject mediaJsonObject) {
       Media media = new Media();
       JsonElement bitrate = mediaJsonObject.get("bitrate");
-      if (bitrate != null && !bitrate.isJsonNull())
-      {
+      if (bitrate != null && !bitrate.isJsonNull()) {
         media.bitrate = bitrate.getAsInt();
         media.hasBitrate = true;
       }
       JsonElement copyright = mediaJsonObject.get("copyright");
-      if (copyright != null && !copyright.isJsonNull())
-      {
+      if (copyright != null && !copyright.isJsonNull()) {
         media.copyright = copyright.getAsString();
       }
       media.duration = mediaJsonObject.get("duration").getAsLong();
@@ -117,8 +110,7 @@ public class JsonGsonTree
       JsonArray personsJsonArray = mediaJsonObject.get("persons").getAsJsonArray();
       int size = personsJsonArray.size();
       List<String> persons = new ArrayList<String>(size);
-      for (JsonElement person : personsJsonArray)
-      {
+      for (JsonElement person : personsJsonArray) {
         persons.add(person.getAsString());
       }
       media.persons = persons;
@@ -129,25 +121,22 @@ public class JsonGsonTree
       return media;
     }
 
-    private static List<Image> readImages(JsonParser parser, String imagesJsonInput) throws Exception
-    {
+    private static List<Image> readImages(JsonParser parser, String imagesJsonInput)
+        throws Exception {
       JsonArray imagesJsonArray = parser.parse(imagesJsonInput).getAsJsonArray();
       return readImages(imagesJsonArray);
     }
 
-    private static List<Image> readImages(JsonArray imagesJsonArray)
-    {
+    private static List<Image> readImages(JsonArray imagesJsonArray) {
       int size = imagesJsonArray.size();
       List<Image> images = new ArrayList<Image>(size);
-      for (JsonElement image : imagesJsonArray)
-      {
+      for (JsonElement image : imagesJsonArray) {
         images.add(readImage(image.getAsJsonObject()));
       }
       return images;
     }
 
-    private static JsonObject createJsonObject(Image image)
-    {
+    private static JsonObject createJsonObject(Image image) {
       JsonObject jsonObject = new JsonObject();
       jsonObject.addProperty("height", image.height);
       jsonObject.addProperty("size", image.size.name());
@@ -157,11 +146,9 @@ public class JsonGsonTree
       return jsonObject;
     }
 
-    private static JsonObject createJsonObject(Media media)
-    {
+    private static JsonObject createJsonObject(Media media) {
       JsonObject jsonObject = new JsonObject();
-      if (media.hasBitrate)
-      {
+      if (media.hasBitrate) {
         jsonObject.addProperty("bitrate", media.bitrate);
       }
       jsonObject.addProperty("copyright", media.copyright);
@@ -170,8 +157,7 @@ public class JsonGsonTree
       jsonObject.addProperty("height", media.height);
       int size = media.persons.size();
       JsonArray personsJsonArray = new JsonArray();
-      for (int i = 0; i < size; i++)
-      {
+      for (int i = 0; i < size; i++) {
         personsJsonArray.add(new JsonPrimitive(media.persons.get(i)));
       }
       jsonObject.add("persons", personsJsonArray);
@@ -183,38 +169,33 @@ public class JsonGsonTree
       return jsonObject;
     }
 
-    private static void writeMedia(StringWriter writer, Media media)
-    {
+    private static void writeMedia(StringWriter writer, Media media) {
       JsonObject jsonObject = createJsonObject(media);
       writer.write(jsonObject.toString());
     }
 
-    private static void writeMediaContent(Writer writer, MediaContent mediaContent) throws Exception
-    {
+    private static void writeMediaContent(Writer writer, MediaContent mediaContent)
+        throws Exception {
       JsonObject jsonObject = new JsonObject();
       jsonObject.add("media", createJsonObject(mediaContent.media));
       jsonObject.add("images", createJsonArray(mediaContent.images));
       writer.write(jsonObject.toString());
     }
 
-    private static void writeImage(Writer writer, Image image) throws Exception
-    {
+    private static void writeImage(Writer writer, Image image) throws Exception {
       JsonObject jsonObject = createJsonObject(image);
       writer.write(jsonObject.toString());
     }
 
-    private static JsonArray createJsonArray(List<Image> images)
-    {
+    private static JsonArray createJsonArray(List<Image> images) {
       JsonArray jsonArray = new JsonArray();
-      for (Image image : images)
-      {
+      for (Image image : images) {
         jsonArray.add(createJsonObject(image));
       }
       return jsonArray;
     }
 
-    private static void writeImages(Writer writer, List<Image> images) throws Exception
-    {
+    private static void writeImages(Writer writer, List<Image> images) throws Exception {
       JsonArray jsonArray = createJsonArray(images);
       writer.write(jsonArray.toString());
     }

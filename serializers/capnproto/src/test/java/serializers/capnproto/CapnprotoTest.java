@@ -9,14 +9,13 @@ import serializers.core.Validator;
 public class CapnprotoTest {
 
 
-	@Test
-	public void TestCorrectness() throws Exception
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
-		CapNProto.register(groups);
+  @Test
+  public void TestCorrectness() throws Exception {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
+    CapNProto.register(groups);
 
-		val.checkForCorrectness(groups, "data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

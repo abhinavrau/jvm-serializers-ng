@@ -10,15 +10,14 @@ import serializers.core.Validator;
 public class FastSerializationTest extends CorrectnessCheckHelper {
 
 
-	@Test
-	public void TestCorrectness() throws Exception
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
+  @Test
+  public void TestCorrectness() throws Exception {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
 
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
-		FastSerialization.register(groups);
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
+    FastSerialization.register(groups);
 
-		val.checkForCorrectness(groups, "data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

@@ -9,17 +9,15 @@ import serializers.core.Validator;
 public class KryoTest {
 
 
-	@Test
-	public void TestCorrectness() throws Throwable
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
+  @Test
+  public void TestCorrectness() throws Throwable {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
 
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
 
+    Kryo.register(groups);
 
-		Kryo.register(groups);
-
-		val.checkForCorrectness(groups, "data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

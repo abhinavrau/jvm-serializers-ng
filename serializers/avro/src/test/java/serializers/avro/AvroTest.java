@@ -10,15 +10,15 @@ import serializers.core.Validator;
 public class AvroTest extends CorrectnessCheckHelper {
 
 
-	@Test
-	public void TestCorrectness() throws Throwable {
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
+  @Test
+  public void TestCorrectness() throws Throwable {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
 
-		AvroGeneric.register(groups);
-		AvroSpecific.register(groups);
-		val.checkForCorrectness(groups, "data");
+    AvroGeneric.register(groups);
+    AvroSpecific.register(groups);
+    val.checkForCorrectness(groups, "data");
 
-	}
+  }
 }

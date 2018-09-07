@@ -1,8 +1,17 @@
 package serializers.json;
 
+import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
+
 import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -11,74 +20,57 @@ import serializers.MediaContentTestGroup;
 import serializers.Serializer;
 import serializers.core.metadata.SerializerProperties;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-
-import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
-import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
-import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
-
 /**
  * Driver that uses JSON.simple [http://code.google.com/p/json-simple/], with manual tree parsing.
  */
-public class JsonSimpleManualTree
-{
-  public static void register(MediaContentTestGroup groups)
-  {
+public class JsonSimpleManualTree {
+
+  public static void register(MediaContentTestGroup groups) {
     SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
     SerializerProperties properties = builder
-            .format(SerializerProperties.Format.JSON)
-            .apiStyle(FIELD_BASED)
-            .mode(CODE_FIRST)
-            .valueType(NONE)
-            .name("json-simple")
-            .projectURL("http://code.google.com/p/json-simple")
-            .build();
+        .format(SerializerProperties.Format.JSON)
+        .apiStyle(FIELD_BASED)
+        .mode(CODE_FIRST)
+        .valueType(NONE)
+        .name("json-simple")
+        .projectUrl("http://code.google.com/p/json-simple")
+        .build();
 
     groups.media.add(JavaBuiltIn.mediaTransformer,
         new ManualTreeSerializer(properties));
 
   }
 
-  static class ManualTreeSerializer extends Serializer<MediaContent>
-  {
+  static class ManualTreeSerializer extends Serializer<MediaContent> {
+
     private final JSONParser parser;
 
-    public ManualTreeSerializer(SerializerProperties properties)
-    {
+    public ManualTreeSerializer(SerializerProperties properties) {
       super(properties);
       parser = new JSONParser();
     }
 
-    public MediaContent deserialize(byte[] array) throws Exception
-    {
+    public MediaContent deserialize(byte[] array) throws Exception {
       String mediaContentJsonInput = new String(array, "UTF-8");
       return readMediaContent(parser, mediaContentJsonInput);
     }
 
-    public byte[] serialize(MediaContent mediaContent) throws IOException
-    {
+    public byte[] serialize(MediaContent mediaContent) throws IOException {
       StringWriter writer = new StringWriter();
       writeMediaContent(writer, mediaContent);
       writer.flush();
       return writer.toString().getBytes("UTF-8");
     }
 
-    static Media readMedia(JSONParser parser, String mediaJsonInput) throws Exception
-    {
+    static Media readMedia(JSONParser parser, String mediaJsonInput) throws Exception {
       JSONObject mediaJsonObject = (JSONObject) parser.parse(mediaJsonInput);
       return readMedia(parser, mediaJsonObject);
     }
 
-    static Media readMedia(JSONParser parser, JSONObject mediaJsonObject) throws Exception
-    {
+    static Media readMedia(JSONParser parser, JSONObject mediaJsonObject) throws Exception {
       Media media = new Media();
       Object bitrate = mediaJsonObject.get("bitrate");
-      if (bitrate != null && bitrate instanceof Long)
-      {
+      if (bitrate != null && bitrate instanceof Long) {
         media.bitrate = ((Long) bitrate).intValue();
         media.hasBitrate = true;
       }
@@ -100,8 +92,8 @@ public class JsonSimpleManualTree
       return media;
     }
 
-    static MediaContent readMediaContent(JSONParser parser, String mediaContentJsonInput) throws Exception
-    {
+    static MediaContent readMediaContent(JSONParser parser, String mediaContentJsonInput)
+        throws Exception {
       JSONObject mediaContentJsonObject = (JSONObject) parser.parse(mediaContentJsonInput);
       MediaContent mediaContent = new MediaContent();
       mediaContent.images = readImages(parser, (JSONArray) mediaContentJsonObject.get("images"));
@@ -109,14 +101,12 @@ public class JsonSimpleManualTree
       return mediaContent;
     }
 
-    static Image readImage(JSONParser parser, String imageJsonInput) throws Exception
-    {
+    static Image readImage(JSONParser parser, String imageJsonInput) throws Exception {
       JSONObject imageJsonObject = (JSONObject) parser.parse(imageJsonInput);
       return readImage(parser, imageJsonObject);
     }
 
-    static Image readImage(JSONParser parser, JSONObject imageJsonObject) throws Exception
-    {
+    static Image readImage(JSONParser parser, JSONObject imageJsonObject) throws Exception {
       Image image = new Image();
       image.height = ((Long) imageJsonObject.get("height")).intValue();
       image.size = Image.Size.valueOf((String) imageJsonObject.get("size"));
@@ -126,29 +116,24 @@ public class JsonSimpleManualTree
       return image;
     }
 
-    static List<Image> readImages(JSONParser parser, String imagesJsonInput) throws Exception
-    {
+    static List<Image> readImages(JSONParser parser, String imagesJsonInput) throws Exception {
       JSONArray imagesJsonArray = (JSONArray) parser.parse(imagesJsonInput);
       return readImages(parser, imagesJsonArray);
     }
 
-    static List<Image> readImages(JSONParser parser, JSONArray imagesJsonArray) throws Exception
-    {
+    static List<Image> readImages(JSONParser parser, JSONArray imagesJsonArray) throws Exception {
       int size = imagesJsonArray.size();
       List<Image> images = new ArrayList<Image>(size);
-      for (int i = 0; i < size; i++)
-      {
+      for (int i = 0; i < size; i++) {
         images.add(readImage(parser, (JSONObject) imagesJsonArray.get(i)));
       }
       return images;
     }
 
     @SuppressWarnings("unchecked")
-    static JSONObject createJsonObject(Media media)
-    {
+    static JSONObject createJsonObject(Media media) {
       JSONObject jsonObject = new JSONObject();
-      if (media.hasBitrate)
-      {
+      if (media.hasBitrate) {
         jsonObject.put("bitrate", media.bitrate);
       }
       jsonObject.put("copyright", media.copyright);
@@ -157,8 +142,7 @@ public class JsonSimpleManualTree
       jsonObject.put("height", media.height);
       int size = media.persons.size();
       JSONArray personsJsonArray = new JSONArray();
-      for (int i = 0; i < size; i++)
-      {
+      for (int i = 0; i < size; i++) {
         personsJsonArray.add(media.persons.get(i));
       }
       jsonObject.put("persons", personsJsonArray);
@@ -170,21 +154,18 @@ public class JsonSimpleManualTree
       return jsonObject;
     }
 
-    static void writeMedia(Writer writer, Media media) throws Exception
-    {
+    static void writeMedia(Writer writer, Media media) throws Exception {
       JSONObject jsonObject = createJsonObject(media);
       jsonObject.writeJSONString(writer);
     }
 
-    static void writeImage(Writer writer, Image image) throws Exception
-    {
+    static void writeImage(Writer writer, Image image) throws Exception {
       JSONObject jsonObject = createJsonObject(image);
       jsonObject.writeJSONString(writer);
     }
 
     @SuppressWarnings("unchecked")
-    static JSONObject createJsonObject(Image image)
-    {
+    static JSONObject createJsonObject(Image image) {
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("height", image.height);
       jsonObject.put("size", image.size.name());
@@ -195,8 +176,7 @@ public class JsonSimpleManualTree
     }
 
     @SuppressWarnings("unchecked")
-    static void writeMediaContent(Writer writer, MediaContent mediaContent) throws IOException
-    {
+    static void writeMediaContent(Writer writer, MediaContent mediaContent) throws IOException {
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("media", createJsonObject(mediaContent.media));
       jsonObject.put("images", createJsonArray(mediaContent.images));
@@ -204,18 +184,15 @@ public class JsonSimpleManualTree
     }
 
     @SuppressWarnings("unchecked")
-    static JSONArray createJsonArray(List<Image> images)
-    {
+    static JSONArray createJsonArray(List<Image> images) {
       JSONArray jsonArray = new JSONArray();
-      for (Image image : images)
-      {
+      for (Image image : images) {
         jsonArray.add(createJsonObject(image));
       }
       return jsonArray;
     }
 
-    static void writeImages(Writer writer, List<Image> images) throws Exception
-    {
+    static void writeImages(Writer writer, List<Image> images) throws Exception {
       JSONArray jsonArray = createJsonArray(images);
       jsonArray.writeJSONString(writer);
     }

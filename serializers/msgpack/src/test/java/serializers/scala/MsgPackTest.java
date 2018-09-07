@@ -7,18 +7,17 @@ import serializers.core.Validator;
 import serializers.msgpack.MsgPack;
 
 
-public class MsgPackTest  {
+public class MsgPackTest {
 
 
-	@Test
-	public void TestCorrectness() throws Throwable
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
+  @Test
+  public void TestCorrectness() throws Throwable {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
 
-		MsgPack.register(groups);
+    MsgPack.register(groups);
 
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
-		val.checkForCorrectness(groups, "data");
-	}
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
+    val.checkForCorrectness(groups, "data");
+  }
 }

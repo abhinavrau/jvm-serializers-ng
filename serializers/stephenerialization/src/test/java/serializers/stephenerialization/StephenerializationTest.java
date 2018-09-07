@@ -6,18 +6,18 @@ import serializers.MediaContentTestGroup;
 import serializers.core.Validator;
 
 
-public class StephenerializationTest  {
+public class StephenerializationTest {
 
 
-	@Test
-	public void TestCorrectness() throws Exception
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Stephenerialization.register(groups);
+  @Test
+  public void TestCorrectness() throws Exception {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Stephenerialization.register(groups);
 
-		Validator<data.media.MediaContent,data.media.MediaContent> val = new Validator<>(data.media.MediaContent.class,
-				MediaContent.class);
+    Validator<data.media.MediaContent, data.media.MediaContent> val = new Validator<>(
+        data.media.MediaContent.class,
+        MediaContent.class);
 
-		val.checkForCorrectness(groups, "data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

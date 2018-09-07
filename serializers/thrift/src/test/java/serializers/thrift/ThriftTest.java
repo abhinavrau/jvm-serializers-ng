@@ -10,15 +10,14 @@ import serializers.core.Validator;
 public class ThriftTest {
 
 
-	@Test
-	public void TestCorrectness() throws Exception
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Thrift.register(groups);
+  @Test
+  public void TestCorrectness() throws Exception {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Thrift.register(groups);
 
-		Validator<MediaContent,MediaContent> val = new Validator<>(data.media.MediaContent.class,
-				MediaContent.class);
+    Validator<MediaContent, MediaContent> val = new Validator<>(data.media.MediaContent.class,
+        MediaContent.class);
 
-		val.checkForCorrectness(groups, "data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

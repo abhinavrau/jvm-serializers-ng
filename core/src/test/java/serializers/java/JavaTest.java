@@ -8,21 +8,19 @@ import serializers.MediaContentTestGroup;
 import serializers.core.Validator;
 
 
-
 public class JavaTest {
 
 
+  @Test
+  public void TestCorrectness() throws Throwable {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class,
+        MediaContent.class);
 
-	@Test
-	public void TestCorrectness() throws Throwable
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class, MediaContent.class);
+    JavaBuiltIn.register(groups);
+    JavaManual.register(groups);
 
-		JavaBuiltIn.register(groups);
-		JavaManual.register(groups);
+    val.checkForCorrectness(groups, "data");
 
-		val.checkForCorrectness(groups, "data");
-
-	}
+  }
 }

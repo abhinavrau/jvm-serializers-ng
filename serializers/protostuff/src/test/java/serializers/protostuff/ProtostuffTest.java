@@ -6,22 +6,21 @@ import serializers.MediaContentTestGroup;
 import serializers.core.Validator;
 
 
-public class ProtostuffTest  {
+public class ProtostuffTest {
 
 
-	@Test
-	public void TestCorrectness() throws Throwable
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
+  @Test
+  public void TestCorrectness() throws Throwable {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
 
-		Protostuff.register(groups);
-		ProtostuffJson.register(groups);
-		ProtostuffSmile.register(groups);
-		ProtostuffXml.register(groups);
+    Protostuff.register(groups);
+    ProtostuffJson.register(groups);
+    ProtostuffSmile.register(groups);
+    ProtostuffXml.register(groups);
 
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
 
-		val.checkForCorrectness(groups, "data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

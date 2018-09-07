@@ -9,8 +9,10 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface MediaMapper {
 
-	MediaContent map(MediaContent content);
-	Media map(Media content);
-	Image map(Image content);
+  MediaContent map(MediaContent content);
+
+  Media map(Media content);
+
+  Image map(Image content);
 
 }

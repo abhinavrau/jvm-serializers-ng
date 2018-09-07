@@ -6,19 +6,18 @@ import serializers.MediaContentTestGroup;
 import serializers.core.Validator;
 
 
-public class ColferTest  {
+public class ColferTest {
 
 
-	@Test
-	public void TestCorrectness() throws Exception
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
+  @Test
+  public void TestCorrectness() throws Exception {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
 
-		//TODO: Coded around NullPointer exception on media2
-		Colfer.register(groups);
+    //TODO: Coded around NullPointer exception on media2
+    Colfer.register(groups);
 
-		val.checkForCorrectness(groups, "data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

@@ -6,18 +6,17 @@ import serializers.MediaContentTestGroup;
 import serializers.core.Validator;
 
 
-public class ObserTest  {
+public class ObserTest {
 
 
-	@Test
-	public void TestCorrectness() throws Exception
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Obser.register(groups);
+  @Test
+  public void TestCorrectness() throws Exception {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Obser.register(groups);
 
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
-		val.checkForCorrectness(groups, "data");
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
+    val.checkForCorrectness(groups, "data");
 
-	}
+  }
 }

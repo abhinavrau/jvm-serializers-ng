@@ -6,19 +6,18 @@ import serializers.MediaContentTestGroup;
 import serializers.core.Validator;
 
 
-public class ProtobufTest  {
+public class ProtobufTest {
 
 
-	@Test
-	public void TestCorrectness() throws Throwable
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
+  @Test
+  public void TestCorrectness() throws Throwable {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
 
-		Protobuf.register(groups);
-		ProtobufJson.register(groups);
-		Validator<MediaContent, MediaContent> val =
-				new Validator<>(MediaContent.class, MediaContent.class);
+    Protobuf.register(groups);
+    ProtobufJson.register(groups);
+    Validator<MediaContent, MediaContent> val =
+        new Validator<>(MediaContent.class, MediaContent.class);
 
-		val.checkForCorrectness(groups, "data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

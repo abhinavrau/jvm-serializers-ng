@@ -6,18 +6,17 @@ import serializers.MediaContentTestGroup;
 import serializers.core.Validator;
 
 
-public class DataKernelTest  {
+public class DataKernelTest {
 
 
-	@Test
-	public void TestCorrectness() throws Exception
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Validator<MediaContent, DataKernelSerializer.DMediaContent> val =
-				new Validator<>(MediaContent.class, DataKernelSerializer.DMediaContent.class);
+  @Test
+  public void TestCorrectness() throws Exception {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Validator<MediaContent, DataKernelSerializer.DMediaContent> val =
+        new Validator<>(MediaContent.class, DataKernelSerializer.DMediaContent.class);
 
-		DataKernelSerializer.register(groups);
+    DataKernelSerializer.register(groups);
 
-		val.checkForCorrectness(groups, "data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

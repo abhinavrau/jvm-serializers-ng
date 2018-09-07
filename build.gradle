@@ -19,6 +19,7 @@ subprojects
         compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
         compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.0'
         testCompile "junit:junit:4+"
+        testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
     }
 
 

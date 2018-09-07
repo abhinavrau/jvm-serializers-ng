@@ -6,18 +6,18 @@ import serializers.MediaContentTestGroup;
 import serializers.core.Validator;
 
 
-public class JBossTest  {
+public class JBossTest {
 
 
-	@Test
-	public void TestCorrectness() throws Throwable
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class, MediaContent.class);
+  @Test
+  public void TestCorrectness() throws Throwable {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class,
+        MediaContent.class);
 
-		//TODO: Fix this : JBossMarshalling.register(groups);
-		JBossSerialization.register(groups);
+    //TODO: Fix this : JBossMarshalling.register(groups);
+    JBossSerialization.register(groups);
 
-		val.checkForCorrectness(groups,"data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

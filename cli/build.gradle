@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.3'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
     }
 }
 
@@ -32,7 +32,7 @@ dependencies {
     compile 'info.picocli:picocli:3.4.0'
     compile project(':serializers')
     compile 'de.vandermeer:asciitable:0.3.2'
-
+    compile 'org.hamcrest:hamcrest-junit:2.0.0.0'
     // IMPORTANT: Leave JMH at the end!
     // JMH
     //compile group: 'org.openjdk.jmh', name: 'jmh-core', version: "${jmhVersion}"

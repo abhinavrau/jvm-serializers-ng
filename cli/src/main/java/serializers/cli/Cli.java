@@ -1,5 +1,7 @@
 package serializers.cli;
 
+import java.util.List;
+import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import serializers.MediaContentTestGroup;
 import serializers.Thrift;
@@ -13,10 +15,30 @@ import serializers.externalizor.Externalizors;
 import serializers.flatbuffers.FlatBuffers;
 import serializers.fst.FastSerialization;
 import serializers.hessian.Hessian;
-import serializers.jackson.*;
+import serializers.jackson.JacksonAvroDatabind;
+import serializers.jackson.JacksonCBORDatabind;
+import serializers.jackson.JacksonJrDatabind;
+import serializers.jackson.JacksonJsonDatabind;
+import serializers.jackson.JacksonJsonManual;
+import serializers.jackson.JacksonJsonTree;
+import serializers.jackson.JacksonProtobufDatabind;
+import serializers.jackson.JacksonSmileDatabind;
+import serializers.jackson.JacksonSmileManual;
+import serializers.jackson.JacksonWithAfterburner;
+import serializers.jackson.JacksonWithColumnsDatabind;
+import serializers.jackson.JacksonXmlDatabind;
 import serializers.javaxjson.JavaxJsonStreamGlassfish;
 import serializers.jboss.JBossSerialization;
-import serializers.json.*;
+import serializers.json.FastJSONArrayDatabind;
+import serializers.json.FastJSONDatabind;
+import serializers.json.FlexjsonDatabind;
+import serializers.json.JsonGsonDatabind;
+import serializers.json.JsonGsonManual;
+import serializers.json.JsonLibJsonDatabind;
+import serializers.json.JsonSimpleManualTree;
+import serializers.json.JsonSimpleWithContentHandler;
+import serializers.json.JsonSmartManualTree;
+import serializers.json.JsonSvensonDatabind;
 import serializers.kryo.Kryo;
 import serializers.mongodb.MongoDB;
 import serializers.mongodb.MongoDBManual;
@@ -37,130 +59,125 @@ import serializers.xml.JaxbAalto;
 import serializers.xml.XmlXStream;
 import serializers.xml.javolution.XmlJavolution;
 
-import java.util.List;
-import java.util.concurrent.Callable;
-
 @CommandLine.Command(name = "jmser",
-		sortOptions = false,
-		headerHeading = "Usage:%n%",
-		synopsisHeading = "%n",
-		descriptionHeading = "%nDescription:%n%",
-		parameterListHeading = "%nParameters:%n",
-		optionListHeading = "%nOptions:%n",
-		header = "JVM Micro-benchmarking for Serializers",
-		mixinStandardHelpOptions = true,
-		description = "Uses jhm to benchmark java serialization libraries. See Commands section on available operations",
-		version = "0.1")
+    sortOptions = false,
+    headerHeading = "Usage:%n%",
+    synopsisHeading = "%n",
+    descriptionHeading = "%nDescription:%n%",
+    parameterListHeading = "%nParameters:%n",
+    optionListHeading = "%nOptions:%n",
+    header = "JVM Micro-benchmarking for Serializers",
+    mixinStandardHelpOptions = true,
+    description = "Uses jhm to benchmark java serialization libraries. See Commands section on available operations",
+    version = "0.1")
 public class Cli implements Callable<Void> {
 
-	@Override
-	public Void call() {
+  @Override
+  public Void call() {
 
+    return null;
 
-		return null;
+  }
 
-	}
+  public static MediaContentTestGroup registerAllSerializers() {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    AvroGeneric.register(groups);
+    AvroSpecific.register(groups);
+    CapNProto.register(groups);
+    Colfer.register(groups);
+    DataKernelSerializer.register(groups);
+    DSLPlatform.register(groups);
+    Externalizors.register(groups);
+    FlatBuffers.register(groups);
+    FastSerialization.register(groups);
+    Hessian.register(groups);
 
-	public MediaContentTestGroup registerAllSerializers() {
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		AvroGeneric.register(groups);
-		AvroSpecific.register(groups);
-		CapNProto.register(groups);
-		Colfer.register(groups);
-		DataKernelSerializer.register(groups);
-		DSLPlatform.register(groups);
-		Externalizors.register(groups);
-		FlatBuffers.register(groups);
-		FastSerialization.register(groups);
-		Hessian.register(groups);
+    //Jackson-Binary
+    JacksonAvroDatabind.register(groups);
+    JacksonCBORDatabind.register(groups);
+    JacksonProtobufDatabind.register(groups);
+    JacksonSmileManual.register(groups);
+    JacksonSmileDatabind.register(groups);
 
-		//Jackson-Binary
-		JacksonAvroDatabind.register(groups);
-		JacksonCBORDatabind.register(groups);
-		JacksonProtobufDatabind.register(groups);
-		JacksonSmileManual.register(groups);
-		JacksonSmileDatabind.register(groups);
+    // JavaxJSON
+    JacksonJrDatabind.register(groups);
+    JacksonJsonDatabind.register(groups);
+    JacksonJsonTree.register(groups);
+    JacksonJsonManual.register(groups);
 
-		// JavaxJSON
-		JacksonJrDatabind.register(groups);
-		JacksonJsonDatabind.register(groups);
-		JacksonJsonTree.register(groups);
-		JacksonJsonManual.register(groups);
+    // Jackson databind with Afterburner; add-on module that uses bytecode gen for speed
+    JacksonWithAfterburner.registerAll(groups);
+    // Jackson's column-oriented variants for formats that usually use key/value notation
+    JacksonWithColumnsDatabind.registerAll(groups);
 
-		// Jackson databind with Afterburner; add-on module that uses bytecode gen for speed
-		JacksonWithAfterburner.registerAll(groups);
-		// Jackson's column-oriented variants for formats that usually use key/value notation
-		JacksonWithColumnsDatabind.registerAll(groups);
+    // XML
+    JacksonXmlDatabind.register(groups);
 
-		// XML
-		JacksonXmlDatabind.register(groups);
+    JavaxJsonStreamGlassfish.register(groups);
 
-		JavaxJsonStreamGlassfish.register(groups);
+    // TODO: Fix this - fails correctness check: JavaxJsonTreeGlassfish.register(groups);
 
-		// TODO: Fix this - fails correctness check: JavaxJsonTreeGlassfish.register(groups);
+    //TODO: Fix this - fails correctness check: JBossMarshalling.register(groups);
+    JBossSerialization.register(groups);
 
-		//TODO: Fix this - fails correctness check: JBossMarshalling.register(groups);
-		JBossSerialization.register(groups);
+    //JSON
+    //TODO: Fix All commented lines below which fail correctness check with null on media.2.json
+    FastJSONArrayDatabind.register(groups);
+    FastJSONDatabind.register(groups);
+    FlexjsonDatabind.register(groups);
+    //JsonArgoTree.register(groups);
+    //JsonDotOrgManualTree.register(groups);
+    JsonGsonDatabind.register(groups);
+    JsonGsonManual.register(groups);
+    //JsonGsonTree.register(groups);
+    //JsonijJpath.register(groups);
+    //JsonijManualTree.register(groups);
+    JsonLibJsonDatabind.register(groups);
 
-		//JSON
-		//TODO: Fix All commented lines below which fail correctness check with null on media.2.json
-		FastJSONArrayDatabind.register(groups);
-		FastJSONDatabind.register(groups);
-		FlexjsonDatabind.register(groups);
-		//JsonArgoTree.register(groups);
-		//JsonDotOrgManualTree.register(groups);
-		JsonGsonDatabind.register(groups);
-		JsonGsonManual.register(groups);
-		//JsonGsonTree.register(groups);
-		//JsonijJpath.register(groups);
-		//JsonijManualTree.register(groups);
-		JsonLibJsonDatabind.register(groups);
+    // JsonPathDeserializerOnly.register(groups);
+    JsonSimpleManualTree.register(groups);
+    JsonSimpleWithContentHandler.register(groups);
+    JsonSmartManualTree.register(groups);
+    JsonSvensonDatabind.register(groups);
 
-		// JsonPathDeserializerOnly.register(groups);
-		JsonSimpleManualTree.register(groups);
-		JsonSimpleWithContentHandler.register(groups);
-		JsonSmartManualTree.register(groups);
-		JsonSvensonDatabind.register(groups);
+    Kryo.register(groups);
+    MongoDBManual.register(groups);
+    MongoDB.register(groups);
+    MsgPack.register(groups);
+    Obser.register(groups);
+    Protobuf.register(groups);
+    ProtobufJson.register(groups);
 
-		Kryo.register(groups);
-		MongoDBManual.register(groups);
-		MongoDB.register(groups);
-		MsgPack.register(groups);
-		Obser.register(groups);
-		Protobuf.register(groups);
-		ProtobufJson.register(groups);
+    Protostuff.register(groups);
+    ProtostuffJson.register(groups);
+    ProtostuffSmile.register(groups);
+    ProtostuffXml.register(groups);
 
-		Protostuff.register(groups);
-		ProtostuffJson.register(groups);
-		ProtostuffSmile.register(groups);
-		ProtostuffXml.register(groups);
+    Scala.register(groups);
+    Stephenerialization.register(groups);
 
-		Scala.register(groups);
-		Stephenerialization.register(groups);
+    Thrift.register(groups);
+    Wobly.register(groups);
 
-		Thrift.register(groups);
-		Wobly.register(groups);
+    ExiExificient.register(groups);
+    Jaxb.register(groups);
+    JaxbAalto.register(groups);
+    XmlJavolution.register(groups);
 
+    XmlXStream.register(groups);
 
-		ExiExificient.register(groups);
-		Jaxb.register(groups);
-		JaxbAalto.register(groups);
-		XmlJavolution.register(groups);
+    //TODO: XmlStax does not like media.2.json
+    //XmlStax.register(groups, true, true, true);
 
-		XmlXStream.register(groups);
+    return groups;
+  }
 
-		//TODO: XmlStax does not like media.2.json
-		//XmlStax.register(groups, true, true, true);
+  public static void main(String[] args) throws Exception {
 
-		return groups;
-	}
-
-	public static void main(String[] args) throws Exception {
-
-		CommandLine cmd = new CommandLine(new Cli())
-				.addSubcommand("info", new InfoCmd())
-				.addSubcommand("bench", new BenchmarkCmd());
-		List<Object> result = cmd.parseWithHandler(new CommandLine.RunAll(), args);
-	}
+    CommandLine cmd = new CommandLine(new Cli())
+        .addSubcommand("info", new InfoCmd())
+        .addSubcommand("bench", new BenchmarkCmd());
+    List<Object> result = cmd.parseWithHandler(new CommandLine.RunAll(), args);
+  }
 }
 

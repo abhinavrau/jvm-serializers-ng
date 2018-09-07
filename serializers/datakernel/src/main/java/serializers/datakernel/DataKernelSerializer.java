@@ -1,5 +1,11 @@
 package serializers.datakernel;
 
+import static serializers.core.metadata.SerializerProperties.APIStyle.RUNTIME_BYTECODE_GENERATION;
+import static serializers.core.metadata.SerializerProperties.Features.SUPPORTS_BACKWARD_COMPATIBILITY;
+import static serializers.core.metadata.SerializerProperties.Format.BINARY;
+import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import static serializers.core.metadata.SerializerProperties.ValueType.POJO_WITH_ANNOTATIONS;
+
 import data.media.Image;
 import data.media.Media;
 import data.media.MediaContent;
@@ -11,309 +17,323 @@ import io.datakernel.serializer.SerializerBuilder;
 import io.datakernel.serializer.annotations.Serialize;
 import io.datakernel.serializer.annotations.SerializeNullable;
 import io.datakernel.serializer.annotations.SerializeVarLength;
-import serializers.*;
-import serializers.core.metadata.SerializerProperties;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-
-import static serializers.core.metadata.SerializerProperties.APIStyle.RUNTIME_BYTECODE_GENERATION;
-import static serializers.core.metadata.SerializerProperties.ValueType.POJO_WITH_ANNOTATIONS;
-import static serializers.core.metadata.SerializerProperties.Features.*;
-import static serializers.core.metadata.SerializerProperties.Format.BINARY;
-import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
+import serializers.MediaContentTestGroup;
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
 
 public class DataKernelSerializer {
 
-	public static void register(MediaContentTestGroup groups) {
+  public static void register(MediaContentTestGroup groups) {
 
-		SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
-		SerializerProperties properties = builder.format(BINARY)
-				.apiStyle(RUNTIME_BYTECODE_GENERATION)
-				.mode(CODE_FIRST)
-				.valueType(POJO_WITH_ANNOTATIONS)
-				.feature(SUPPORTS_BACKWARD_COMPATIBILITY)
-				.name("datakernel")
-				.projectURL("http://datakernel.io/docs/modules/serializer.html")
-				.build();
-		groups.media.add(DataKernelSerializer.mediaTransformer,  new DefaultSerializer<>(properties));
+    SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
+    SerializerProperties properties = builder.format(BINARY)
+        .apiStyle(RUNTIME_BYTECODE_GENERATION)
+        .mode(CODE_FIRST)
+        .valueType(POJO_WITH_ANNOTATIONS)
+        .feature(SUPPORTS_BACKWARD_COMPATIBILITY)
+        .name("datakernel")
+        .projectUrl("http://datakernel.io/docs/modules/serializer.html")
+        .build();
+    groups.media.add(DataKernelSerializer.mediaTransformer, new DefaultSerializer<>(properties));
 
-	}
+  }
 
 
+  public static class DefaultSerializer<T> extends Serializer<T> {
 
-	public static class DefaultSerializer<T> extends Serializer<T> {
-		private BufferSerializer<T> serializer;
-		private byte[] array = new byte[20000];
-		SerializationOutputBuffer output = new SerializationOutputBuffer(array);
+    private BufferSerializer<T> serializer;
+    private byte[] array = new byte[20000];
+    SerializationOutputBuffer output = new SerializationOutputBuffer(array);
 
-		public DefaultSerializer(SerializerProperties properties) {
-			super(properties);
-			serializer = SerializerBuilder
-					.newDefaultInstance(ClassLoader.getSystemClassLoader())
-					.create(DMediaContent.class);
-		}
+    public DefaultSerializer(SerializerProperties properties) {
+      super(properties);
+      serializer = SerializerBuilder
+          .newDefaultInstance(ClassLoader.getSystemClassLoader())
+          .create(DMediaContent.class);
+    }
 
-		@Override
-		public T deserialize(byte[] array) throws Exception {
-			return serializer.deserialize(new SerializationInputBuffer(array, 0));
-		}
+    @Override
+    public T deserialize(byte[] array) throws Exception {
+      return serializer.deserialize(new SerializationInputBuffer(array, 0));
+    }
 
-		@Override
-		public byte[] serialize(T content) throws Exception {
-			output.position(0);
-			serializer.serialize(output, content);
+    @Override
+    public byte[] serialize(T content) throws Exception {
+      output.position(0);
+      serializer.serialize(output, content);
 
-			byte[] bytes = new byte[output.position()];
-			System.arraycopy(array, 0, bytes, 0, output.position());
-			return bytes;
-		}
+      byte[] bytes = new byte[output.position()];
+      System.arraycopy(array, 0, bytes, 0, output.position());
+      return bytes;
+    }
 
-	}
+  }
 
-	public static class DImage {
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			DImage dImage = (DImage) o;
-			return width == dImage.width &&
-					height == dImage.height &&
-					Objects.equals(uri, dImage.uri) &&
-					Objects.equals(title, dImage.title) &&
-					size == dImage.size;
-		}
+  public static class DImage {
 
-		@Override
-		public int hashCode() {
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      DImage dImage = (DImage) o;
+      return width == dImage.width &&
+          height == dImage.height &&
+          Objects.equals(uri, dImage.uri) &&
+          Objects.equals(title, dImage.title) &&
+          size == dImage.size;
+    }
 
-			return Objects.hash(uri, title, width, height, size);
-		}
+    @Override
+    public int hashCode() {
 
-		public enum Size {
-			SMALL, LARGE
-		}
+      return Objects.hash(uri, title, width, height, size);
+    }
 
-		@Serialize(order = 1)
-		public String uri;
+    public enum Size {
+      SMALL, LARGE
+    }
 
-		@Serialize(order = 2)
-		@SerializeNullable
-		public String title; // can be null;
+    @Serialize(order = 1)
+    public String uri;
 
-		@Serialize(order = 3)
-		@SerializeVarLength
-		public int width;
+    @Serialize(order = 2)
+    @SerializeNullable
+    public String title; // can be null;
 
-		@Serialize(order = 4)
-		@SerializeVarLength
-		public int height;
+    @Serialize(order = 3)
+    @SerializeVarLength
+    public int width;
 
-		@Serialize(order = 5)
-		public Size size;
+    @Serialize(order = 4)
+    @SerializeVarLength
+    public int height;
 
-		public DImage(String uri, String title, int width, int height, Size size) {
-			this.uri = uri;
-			this.title = title;
-			this.width = width;
-			this.height = height;
-			this.size = size;
-		}
+    @Serialize(order = 5)
+    public Size size;
 
-		public DImage() {}
-	}
+    public DImage(String uri, String title, int width, int height, Size size) {
+      this.uri = uri;
+      this.title = title;
+      this.width = width;
+      this.height = height;
+      this.size = size;
+    }
 
-	public static class DMedia {
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			DMedia dMedia = (DMedia) o;
-			return width == dMedia.width &&
-					height == dMedia.height &&
-					duration == dMedia.duration &&
-					size == dMedia.size &&
-					bitrate == dMedia.bitrate &&
-					hasBitrate == dMedia.hasBitrate &&
-					Objects.equals(uri, dMedia.uri) &&
-					Objects.equals(title, dMedia.title) &&
-					Objects.equals(format, dMedia.format) &&
-					Objects.equals(persons, dMedia.persons) &&
-					player == dMedia.player &&
-					Objects.equals(copyright, dMedia.copyright);
-		}
+    public DImage() {
+    }
+  }
 
-		@Override
-		public int hashCode() {
+  public static class DMedia {
 
-			return Objects.hash(uri, title, width, height, format, duration, size, bitrate, hasBitrate, persons, player, copyright);
-		}
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      DMedia dMedia = (DMedia) o;
+      return width == dMedia.width &&
+          height == dMedia.height &&
+          duration == dMedia.duration &&
+          size == dMedia.size &&
+          bitrate == dMedia.bitrate &&
+          hasBitrate == dMedia.hasBitrate &&
+          Objects.equals(uri, dMedia.uri) &&
+          Objects.equals(title, dMedia.title) &&
+          Objects.equals(format, dMedia.format) &&
+          Objects.equals(persons, dMedia.persons) &&
+          player == dMedia.player &&
+          Objects.equals(copyright, dMedia.copyright);
+    }
 
-		public enum Player {
-			JAVA, FLASH
-		}
+    @Override
+    public int hashCode() {
 
-		@Serialize(order = 1)
-		public String uri;
+      return Objects
+          .hash(uri, title, width, height, format, duration, size, bitrate, hasBitrate, persons,
+              player, copyright);
+    }
 
-		@Serialize(order = 2)
-		@SerializeNullable
-		public String title; // can be null
+    public enum Player {
+      JAVA, FLASH
+    }
 
-		@Serialize(order = 3)
-		@SerializeVarLength
-		public int width;
+    @Serialize(order = 1)
+    public String uri;
 
-		@Serialize(order = 4)
-		@SerializeVarLength
-		public int height;
+    @Serialize(order = 2)
+    @SerializeNullable
+    public String title; // can be null
 
-		@Serialize(order = 5)
-		public String format;
+    @Serialize(order = 3)
+    @SerializeVarLength
+    public int width;
 
-		@Serialize(order = 6)
-		public long duration;
+    @Serialize(order = 4)
+    @SerializeVarLength
+    public int height;
 
-		@Serialize(order = 7)
-		public long size;
+    @Serialize(order = 5)
+    public String format;
 
-		@Serialize(order = 8)
-		public int bitrate; // can be unset
+    @Serialize(order = 6)
+    public long duration;
 
-		@Serialize(order = 9)
-		public boolean hasBitrate;
+    @Serialize(order = 7)
+    public long size;
 
-		@Serialize(order = 10)
-		public List<String> persons;
+    @Serialize(order = 8)
+    public int bitrate; // can be unset
 
-		@Serialize(order = 11)
-		public Player player;
+    @Serialize(order = 9)
+    public boolean hasBitrate;
 
-		@Serialize(order = 12)
-		@SerializeNullable
-		public String copyright; // can be null
+    @Serialize(order = 10)
+    public List<String> persons;
 
-		public DMedia(String uri, String title, int width, int height,
-		              String format, long duration, long size, int bitrate,
-		              boolean hasBitrate, List<String> persons, Player player,
-		              String copyright) {
-			this.uri = uri;
-			this.title = title;
-			this.width = width;
-			this.height = height;
-			this.format = format;
-			this.duration = duration;
-			this.size = size;
-			this.bitrate = bitrate;
-			this.hasBitrate = hasBitrate;
-			this.persons = persons;
-			this.player = player;
-			this.copyright = copyright;
-		}
+    @Serialize(order = 11)
+    public Player player;
 
-		public DMedia() {}
-	}
+    @Serialize(order = 12)
+    @SerializeNullable
+    public String copyright; // can be null
 
-	public static class DMediaContent {
-		@Serialize(order = 1)
-		public List<DImage> DImages;
+    public DMedia(String uri, String title, int width, int height,
+        String format, long duration, long size, int bitrate,
+        boolean hasBitrate, List<String> persons, Player player,
+        String copyright) {
+      this.uri = uri;
+      this.title = title;
+      this.width = width;
+      this.height = height;
+      this.format = format;
+      this.duration = duration;
+      this.size = size;
+      this.bitrate = bitrate;
+      this.hasBitrate = hasBitrate;
+      this.persons = persons;
+      this.player = player;
+      this.copyright = copyright;
+    }
 
-		@Serialize(order = 2)
-		public DMedia DMedia;
+    public DMedia() {
+    }
+  }
 
-		public DMediaContent(List<DImage> list, DMedia DMedia) {
-			this.DImages = list;
-			this.DMedia = DMedia;
-		}
+  public static class DMediaContent {
 
-		public DMediaContent() {}
+    @Serialize(order = 1)
+    public List<DImage> DImages;
 
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			DMediaContent that = (DMediaContent) o;
-			return Objects.equals(DImages, that.DImages) &&
-					Objects.equals(DMedia, that.DMedia);
-		}
+    @Serialize(order = 2)
+    public DMedia DMedia;
 
-		@Override
-		public int hashCode() {
+    public DMediaContent(List<DImage> list, DMedia DMedia) {
+      this.DImages = list;
+      this.DMedia = DMedia;
+    }
 
-			return Objects.hash(DImages, DMedia);
-		}
-	}
+    public DMediaContent() {
+    }
 
-	public static MediaTransformer<DMediaContent> mediaTransformer = new MediaTransformer<DMediaContent>() {
-		@Override
-		public DMediaContent forward(MediaContent a) {
-			return new DMediaContent(forwardImages(a.getImages()), forwardMedia(a.getMedia()));
-		}
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      DMediaContent that = (DMediaContent) o;
+      return Objects.equals(DImages, that.DImages) &&
+          Objects.equals(DMedia, that.DMedia);
+    }
 
-		@Override
-		public MediaContent reverse(DMediaContent a) {
-			return new MediaContent(reverseMedia(a.DMedia), reverseImages(a.DImages));
-		}
+    @Override
+    public int hashCode() {
 
-		@Override
-		public MediaContent shallowReverse(DMediaContent a) {
-			return new MediaContent(reverseMedia(a.DMedia), Collections.<Image>emptyList());
-		}
-	};
+      return Objects.hash(DImages, DMedia);
+    }
+  }
 
-	private static List<DImage> forwardImages(List<Image> images) {
-		List<DImage> list = new ArrayList<>(images.size());
-		for (Image image : images) {
-			list.add(forwardImage(image));
-		}
-		return list;
-	}
+  public static MediaTransformer<DMediaContent> mediaTransformer = new MediaTransformer<DMediaContent>() {
+    @Override
+    public DMediaContent forward(MediaContent a) {
+      return new DMediaContent(forwardImages(a.getImages()), forwardMedia(a.getMedia()));
+    }
 
-	private static DMedia forwardMedia(Media m) {
-		return new DMedia(m.uri, m.title, m.width, m.height,
-				m.format, m.duration, m.size, m.bitrate,
-				m.hasBitrate, m.persons, forwardPlayer(m.player),
-				m.copyright);
-	}
+    @Override
+    public MediaContent reverse(DMediaContent a) {
+      return new MediaContent(reverseMedia(a.DMedia), reverseImages(a.DImages));
+    }
 
-	private static DImage forwardImage(Image i) {
-		return new DImage(i.uri, i.title, i.width, i.height, forwardSize(i.size));
-	}
+    @Override
+    public MediaContent shallowReverse(DMediaContent a) {
+      return new MediaContent(reverseMedia(a.DMedia), Collections.<Image>emptyList());
+    }
+  };
 
-	private static List<Image> reverseImages(List<DImage> DImages) {
-		List<Image> list = new ArrayList<>(DImages.size());
-		for (DImage DImage : DImages) {
-			list.add(reverseImage(DImage));
-		}
-		return list;
-	}
+  private static List<DImage> forwardImages(List<Image> images) {
+    List<DImage> list = new ArrayList<>(images.size());
+    for (Image image : images) {
+      list.add(forwardImage(image));
+    }
+    return list;
+  }
 
-	private static Media reverseMedia(DMedia m) {
-		return new Media(m.uri, m.title, m.width, m.height,
-				m.format, m.duration, m.size, m.bitrate,
-				m.hasBitrate, m.persons, reversePlayer(m.player),
-				m.copyright);
-	}
+  private static DMedia forwardMedia(Media m) {
+    return new DMedia(m.uri, m.title, m.width, m.height,
+        m.format, m.duration, m.size, m.bitrate,
+        m.hasBitrate, m.persons, forwardPlayer(m.player),
+        m.copyright);
+  }
 
-	private static Image reverseImage(DImage i) {
-		return new Image(i.uri, i.title, i.width, i.height, reverseSize(i.size));
-	}
+  private static DImage forwardImage(Image i) {
+    return new DImage(i.uri, i.title, i.width, i.height, forwardSize(i.size));
+  }
 
-	private static Image.Size reverseSize(DImage.Size oldSize) {
-		return Image.Size.values()[(oldSize.ordinal())];
-	}
+  private static List<Image> reverseImages(List<DImage> DImages) {
+    List<Image> list = new ArrayList<>(DImages.size());
+    for (DImage DImage : DImages) {
+      list.add(reverseImage(DImage));
+    }
+    return list;
+  }
 
-	private static Media.Player reversePlayer(DMedia.Player oldPlayer) {
-		return Media.Player.values()[(oldPlayer.ordinal())];
-	}
+  private static Media reverseMedia(DMedia m) {
+    return new Media(m.uri, m.title, m.width, m.height,
+        m.format, m.duration, m.size, m.bitrate,
+        m.hasBitrate, m.persons, reversePlayer(m.player),
+        m.copyright);
+  }
 
-	private static DImage.Size forwardSize(Image.Size oldSize) {
-		return DImage.Size.valueOf(oldSize.name());
-	}
+  private static Image reverseImage(DImage i) {
+    return new Image(i.uri, i.title, i.width, i.height, reverseSize(i.size));
+  }
 
-	private static DMedia.Player forwardPlayer(Media.Player oldPlayer) {
-		return DMedia.Player.valueOf(oldPlayer.name());
-	}
+  private static Image.Size reverseSize(DImage.Size oldSize) {
+    return Image.Size.values()[(oldSize.ordinal())];
+  }
+
+  private static Media.Player reversePlayer(DMedia.Player oldPlayer) {
+    return Media.Player.values()[(oldPlayer.ordinal())];
+  }
+
+  private static DImage.Size forwardSize(Image.Size oldSize) {
+    return DImage.Size.valueOf(oldSize.name());
+  }
+
+  private static DMedia.Player forwardPlayer(Media.Player oldPlayer) {
+    return DMedia.Player.valueOf(oldPlayer.name());
+  }
 }

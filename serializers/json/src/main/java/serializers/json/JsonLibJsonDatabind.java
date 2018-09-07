@@ -1,55 +1,53 @@
 package serializers.json;
 
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
-import serializers.JavaBuiltIn;
-import serializers.Serializer;
-import serializers.MediaContentTestGroup;
-import serializers.core.metadata.SerializerProperties;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-
 import static serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION;
 import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
 import static serializers.core.metadata.SerializerProperties.ValueType.POJO;
 
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import serializers.JavaBuiltIn;
+import serializers.MediaContentTestGroup;
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
+
 /**
  * This serializer uses JSON-lib [http://json-lib.sourceforge.net] for JSON data binding.
  */
-public class JsonLibJsonDatabind
-{
-  public static void register(MediaContentTestGroup groups)
-  {
+public class JsonLibJsonDatabind {
+
+  public static void register(MediaContentTestGroup groups) {
     SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
     SerializerProperties properties = builder
-            .format(SerializerProperties.Format.JSON)
-            .apiStyle(REFLECTION)
-            .mode(CODE_FIRST)
-            .valueType(POJO)
-            .name("json-lib")
-            .projectURL("http://json-lib.sourceforge.net")
-            .build();
+        .format(SerializerProperties.Format.JSON)
+        .apiStyle(REFLECTION)
+        .mode(CODE_FIRST)
+        .valueType(POJO)
+        .name("json-lib")
+        .projectUrl("http://json-lib.sourceforge.net")
+        .build();
 
     groups.media.add(JavaBuiltIn.mediaTransformer,
         new GenericSerializer<MediaContent>(properties, MediaContent.class));
   }
 
-  static class GenericSerializer<T> extends Serializer<T>
-  {
+  static class GenericSerializer<T> extends Serializer<T> {
+
     private final Class<T> type;
     // private final net.sf.ezmorph.MorpherRegistry _morpherRegistry;
     private final net.sf.json.JsonConfig _jsonConfig;
 
-    public GenericSerializer(SerializerProperties properties, Class<T> clazz)
-    {
+    public GenericSerializer(SerializerProperties properties, Class<T> clazz) {
       super(properties);
       type = clazz;
 
-      net.sf.ezmorph.MorpherRegistry _morpherRegistry = net.sf.json.util.JSONUtils.getMorpherRegistry();
+      net.sf.ezmorph.MorpherRegistry _morpherRegistry = net.sf.json.util.JSONUtils
+          .getMorpherRegistry();
       _morpherRegistry.registerMorpher(new net.sf.json.util.EnumMorpher(Media.Player.class));
       _morpherRegistry.registerMorpher(new net.sf.json.util.EnumMorpher(Image.Size.class));
       // "preferred" approach with BeanMorpher causes excessive info logging
@@ -60,20 +58,17 @@ public class JsonLibJsonDatabind
       _jsonConfig.setRootClass(type);
 
       // else JSON null is turned into empty string, which fails equality tests
-      _jsonConfig.registerDefaultValueProcessor(String.class, 
-          new net.sf.json.processors.DefaultValueProcessor() 
-          {
+      _jsonConfig.registerDefaultValueProcessor(String.class,
+          new net.sf.json.processors.DefaultValueProcessor() {
             @Override
-            public Object getDefaultValue(Class type)
-            {
-                return net.sf.json.JSONNull.getInstance();
+            public Object getDefaultValue(Class type) {
+              return net.sf.json.JSONNull.getInstance();
             }
           });
     }
 
     @SuppressWarnings("unchecked")
-    public T deserialize(byte[] array) throws Exception
-    {
+    public T deserialize(byte[] array) throws Exception {
       String jsonInput = new String(array, "UTF-8");
       net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(jsonInput);
       T result = (T) net.sf.json.JSONObject.toBean(jsonObject, _jsonConfig);
@@ -82,9 +77,8 @@ public class JsonLibJsonDatabind
       // Instead, JSON-lib populates the list with MorphDynaBeans, which can be transformed to the target type.
       MediaContent mediaContent = (MediaContent) result;
       int size = mediaContent.images.size();
-      List<Image> replacementImages = new ArrayList<Image> (size);
-      for (int i = 0; i < size; i++)
-      {
+      List<Image> replacementImages = new ArrayList<Image>(size);
+      for (int i = 0; i < size; i++) {
         // "preferred" approach with BeanMorpher causes excessive info logging -- TODO: figure out how to config
         // Object image = mediaContent.images.get(i);
         // replacementImages.add((Image)_morpherRegistry.morph(Image.class, image));
@@ -93,7 +87,8 @@ public class JsonLibJsonDatabind
         Object o = mediaContent.images.get(i);
         net.sf.ezmorph.bean.MorphDynaBean image = (net.sf.ezmorph.bean.MorphDynaBean) o;
         net.sf.json.JSONObject imageJsonObject = net.sf.json.JSONObject.fromObject(image);
-        Image replacementImage = (Image) net.sf.json.JSONObject.toBean(imageJsonObject, Image.class);
+        Image replacementImage = (Image) net.sf.json.JSONObject
+            .toBean(imageJsonObject, Image.class);
 
         // a slightly "manual" approach (?) that is about 10% faster, but isn't it cheating?
         //Image replacementImage = new Image();
@@ -109,8 +104,7 @@ public class JsonLibJsonDatabind
       return result;
     }
 
-    public byte[] serialize(T data) throws IOException
-    {
+    public byte[] serialize(T data) throws IOException {
       StringWriter w = new StringWriter();
       net.sf.json.JSONSerializer.toJSON(data, _jsonConfig).write(w);
       w.flush();

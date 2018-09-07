@@ -1,86 +1,76 @@
 package serializers.json;
 
-import data.media.Image;
-import data.media.Media;
-import data.media.MediaContent;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONWriter;
-import serializers.JavaBuiltIn;
-import serializers.Serializer;
-import serializers.MediaContentTestGroup;
-import serializers.core.metadata.SerializerProperties;
-
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-
 import static serializers.core.metadata.SerializerProperties.APIStyle.FIELD_BASED;
 import static serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST;
 import static serializers.core.metadata.SerializerProperties.ValueType.NONE;
 
+import data.media.Image;
+import data.media.Media;
+import data.media.MediaContent;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+import serializers.JavaBuiltIn;
+import serializers.MediaContentTestGroup;
+import serializers.Serializer;
+import serializers.core.metadata.SerializerProperties;
+
 /**
  * Driver that uses the json.org reference JSON implementation in Java, with semi-manual parsing.
  */
-public class JsonDotOrgManualTree
-{
-  public static void register(MediaContentTestGroup groups)
-  {
+public class JsonDotOrgManualTree {
+
+  public static void register(MediaContentTestGroup groups) {
     SerializerProperties.SerializerPropertiesBuilder builder = SerializerProperties.builder();
     SerializerProperties properties = builder
-            .format(SerializerProperties.Format.JSON)
-            .apiStyle(FIELD_BASED)
-            .mode(CODE_FIRST)
-            .valueType(NONE)
-            .name("json.org")
-            .projectURL("http://json.org/")
-            .build();
+        .format(SerializerProperties.Format.JSON)
+        .apiStyle(FIELD_BASED)
+        .mode(CODE_FIRST)
+        .valueType(NONE)
+        .name("json.org")
+        .projectUrl("http://json.org/")
+        .build();
 
     groups.media.add(JavaBuiltIn.mediaTransformer,
         new ManualTreeSerializer(properties));
   }
 
-  static class ManualTreeSerializer extends Serializer<MediaContent>
-  {
+  static class ManualTreeSerializer extends Serializer<MediaContent> {
 
 
-    public ManualTreeSerializer(SerializerProperties properties)
-    {
+    public ManualTreeSerializer(SerializerProperties properties) {
       super(properties);
     }
 
-    public MediaContent deserialize(byte[] array) throws Exception
-    {
+    public MediaContent deserialize(byte[] array) throws Exception {
       String mediaContentJsonInput = new String(array, "UTF-8");
       return readMediaContent(mediaContentJsonInput);
     }
 
-    public byte[] serialize(MediaContent mediaContent) throws Exception
-    {
+    public byte[] serialize(MediaContent mediaContent) throws Exception {
       StringWriter writer = new StringWriter();
       writeMediaContent(new JSONWriter(writer), mediaContent);
       writer.flush();
       return writer.toString().getBytes("UTF-8");
     }
 
-    static Media readMedia(String mediaJsonInput) throws Exception
-    {
+    static Media readMedia(String mediaJsonInput) throws Exception {
       JSONObject mediaJsonObject = new JSONObject(mediaJsonInput);
       return readMedia(mediaJsonObject);
     }
 
-    static Media readMedia(JSONObject mediaJsonObject) throws Exception
-    {
+    static Media readMedia(JSONObject mediaJsonObject) throws Exception {
       Media media = new Media();
       Object bitrate = mediaJsonObject.get("bitrate");
-      if (bitrate != null && bitrate instanceof Integer)
-      {
+      if (bitrate != null && bitrate instanceof Integer) {
         media.bitrate = ((Integer) bitrate).intValue();
         media.hasBitrate = true;
       }
       Object copyright = mediaJsonObject.get("copyright");
-      if (copyright != null && !JSONObject.NULL.equals(copyright))
-      {
+      if (copyright != null && !JSONObject.NULL.equals(copyright)) {
         media.copyright = (String) mediaJsonObject.get("copyright");
       }
       media.duration = ((Integer) mediaJsonObject.get("duration")).longValue();
@@ -88,8 +78,7 @@ public class JsonDotOrgManualTree
       media.height = ((Integer) mediaJsonObject.get("height")).intValue();
       List<String> persons = new ArrayList<String>();
       JSONArray personsJsonArray = (JSONArray) mediaJsonObject.get("persons");
-      for (int i = 0, size = personsJsonArray.length(); i < size; i++)
-      {
+      for (int i = 0, size = personsJsonArray.length(); i < size; i++) {
         persons.add((String) personsJsonArray.get(i));
       }
       media.persons = persons;
@@ -101,8 +90,7 @@ public class JsonDotOrgManualTree
       return media;
     }
 
-    static MediaContent readMediaContent(String mediaContentJsonInput) throws Exception
-    {
+    static MediaContent readMediaContent(String mediaContentJsonInput) throws Exception {
       JSONObject mediaContentJsonObject = new JSONObject(mediaContentJsonInput);
       MediaContent mediaContent = new MediaContent();
       mediaContent.images = readImages((JSONArray) mediaContentJsonObject.get("images"));
@@ -110,14 +98,12 @@ public class JsonDotOrgManualTree
       return mediaContent;
     }
 
-    static Image readImage(String imageJsonInput) throws Exception
-    {
+    static Image readImage(String imageJsonInput) throws Exception {
       JSONObject imageJsonObject = new JSONObject(imageJsonInput);
       return readImage(imageJsonObject);
     }
 
-    static Image readImage(JSONObject imageJsonObject) throws Exception
-    {
+    static Image readImage(JSONObject imageJsonObject) throws Exception {
       Image image = new Image();
       image.height = ((Integer) imageJsonObject.get("height")).intValue();
       image.size = Image.Size.valueOf((String) imageJsonObject.get("size"));
@@ -127,28 +113,23 @@ public class JsonDotOrgManualTree
       return image;
     }
 
-    static List<Image> readImages(String imagesJsonInput) throws Exception
-    {
+    static List<Image> readImages(String imagesJsonInput) throws Exception {
       JSONArray imagesJsonArray = new JSONArray(imagesJsonInput);
       return readImages(imagesJsonArray);
     }
 
-    static List<Image> readImages(JSONArray imagesJsonArray) throws Exception
-    {
+    static List<Image> readImages(JSONArray imagesJsonArray) throws Exception {
       int size = imagesJsonArray.length();
       List<Image> images = new ArrayList<Image>(size);
-      for (int i = 0; i < size; i++)
-      {
+      for (int i = 0; i < size; i++) {
         images.add(readImage((JSONObject) imagesJsonArray.get(i)));
       }
       return images;
     }
 
-    static void writeJsonObject(JSONWriter jsonWriter, Media media) throws Exception
-    {
+    static void writeJsonObject(JSONWriter jsonWriter, Media media) throws Exception {
       jsonWriter.object();
-      if (media.hasBitrate)
-      {
+      if (media.hasBitrate) {
         jsonWriter.key("bitrate").value(media.bitrate);
       }
       jsonWriter.key("copyright").value(media.copyright);
@@ -156,8 +137,7 @@ public class JsonDotOrgManualTree
       jsonWriter.key("format").value(media.format);
       jsonWriter.key("height").value(media.height);
       JSONArray personsJsonArray = new JSONArray();
-      for (int i = 0, size = media.persons.size(); i < size; i++)
-      {
+      for (int i = 0, size = media.persons.size(); i < size; i++) {
         personsJsonArray.put(media.persons.get(i));
       }
       jsonWriter.key("persons").value(personsJsonArray);
@@ -169,18 +149,15 @@ public class JsonDotOrgManualTree
       jsonWriter.endObject();
     }
 
-    static void writeMedia(JSONWriter jsonWriter, Media media) throws Exception
-    {
+    static void writeMedia(JSONWriter jsonWriter, Media media) throws Exception {
       writeJsonObject(jsonWriter, media);
     }
 
-    static void writeImage(JSONWriter jsonWriter, Image image) throws Exception
-    {
+    static void writeImage(JSONWriter jsonWriter, Image image) throws Exception {
       writeJsonObject(jsonWriter, image);
     }
 
-    static void writeJsonObject(JSONWriter jsonWriter, Image image) throws Exception
-    {
+    static void writeJsonObject(JSONWriter jsonWriter, Image image) throws Exception {
       jsonWriter.object();
       jsonWriter.key("height").value(image.height);
       jsonWriter.key("size").value(image.size.name());
@@ -190,8 +167,8 @@ public class JsonDotOrgManualTree
       jsonWriter.endObject();
     }
 
-    static void writeMediaContent(JSONWriter jsonWriter, MediaContent mediaContent) throws Exception
-    {
+    static void writeMediaContent(JSONWriter jsonWriter, MediaContent mediaContent)
+        throws Exception {
       jsonWriter.object();
       jsonWriter.key("media");
       writeJsonObject(jsonWriter, mediaContent.media);
@@ -200,18 +177,15 @@ public class JsonDotOrgManualTree
       jsonWriter.endObject();
     }
 
-    static void writeJsonArray(JSONWriter jsonWriter, List<Image> images) throws Exception
-    {
+    static void writeJsonArray(JSONWriter jsonWriter, List<Image> images) throws Exception {
       jsonWriter.array();
-      for (Image image : images)
-      {
+      for (Image image : images) {
         writeJsonObject(jsonWriter, image);
       }
       jsonWriter.endArray();
     }
 
-    static void writeImages(JSONWriter jsonWriter, List<Image> images) throws Exception
-    {
+    static void writeImages(JSONWriter jsonWriter, List<Image> images) throws Exception {
       writeJsonArray(jsonWriter, images);
     }
   }

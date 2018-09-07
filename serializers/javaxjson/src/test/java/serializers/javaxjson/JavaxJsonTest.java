@@ -9,19 +9,17 @@ import serializers.core.Validator;
 public class JavaxJsonTest {
 
 
-	@Test
-	public void TestCorrectness() throws Throwable
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
+  @Test
+  public void TestCorrectness() throws Throwable {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
 
-		Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class, MediaContent.class);
+    Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class,
+        MediaContent.class);
 
-		JavaxJsonStreamGlassfish.register(groups);
+    JavaxJsonStreamGlassfish.register(groups);
 
-		// TODO: Fix this: JavaxJsonTreeGlassfish.register(groups);
+    // TODO: Fix this: JavaxJsonTreeGlassfish.register(groups);
 
-
-
-		val.checkForCorrectness(groups,"data");
-	}
+    val.checkForCorrectness(groups, "data");
+  }
 }

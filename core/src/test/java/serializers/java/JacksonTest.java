@@ -7,18 +7,18 @@ import serializers.core.Validator;
 import serializers.jackson.JacksonJsonManual;
 
 
-public class JacksonTest  {
+public class JacksonTest {
 
 
-	@Test
-	public void TestCorrectness() throws Throwable
-	{
-		MediaContentTestGroup groups = new MediaContentTestGroup();
-		Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class, MediaContent.class);
+  @Test
+  public void TestCorrectness() throws Throwable {
+    MediaContentTestGroup groups = new MediaContentTestGroup();
+    Validator<MediaContent, MediaContent> val = new Validator<>(MediaContent.class,
+        MediaContent.class);
 
-		JacksonJsonManual.register(groups);
+    JacksonJsonManual.register(groups);
 
-		val.checkForCorrectness(groups, "data");
+    val.checkForCorrectness(groups, "data");
 
-	}
+  }
 }
