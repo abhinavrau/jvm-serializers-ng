@@ -3,13 +3,13 @@ package serializers.scala
 import _root_.java.util.ArrayList
 
 import _root_.sbinary._
+import _root_.serializers.{JavaBuiltIn, MediaContentTestGroup, Serializer, scala => sdata}
 import serializers.core.metadata.SerializerProperties
 import serializers.core.metadata.SerializerProperties.APIStyle.REFLECTION
 import serializers.core.metadata.SerializerProperties.Format.{BINARY, BINARY_JDK_COMPATIBLE}
 import serializers.core.metadata.SerializerProperties.Mode.CODE_FIRST
 import serializers.core.metadata.SerializerProperties.ValueType.POJO
 import serializers.scala.media.{Image, Media, MediaContent}
-import _root_.serializers.{JavaBuiltIn, MediaContentTestGroup, Serializer, scala => sdata}
 
 import _root_.scala.collection.JavaConversions._;
 

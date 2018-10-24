@@ -62,7 +62,7 @@ public class Validator<S, T> {
   protected void checkForCorrectness(final MediaContentTestGroup groups,
       final InputStream inputStream, final String dataFileName) throws Exception {
     Set<Table.Cell<String, SerializerProperties, TestGroup.Entry<MediaContent, Object>>> entries
-        = groups.media.entries.cellSet();
+        = groups.media.getTable().cellSet();
 
     S testData = loadTestData(inputStream);
     for (Table.Cell<String, SerializerProperties, TestGroup.Entry<MediaContent, Object>> entry : entries) {

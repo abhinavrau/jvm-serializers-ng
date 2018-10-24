@@ -68,7 +68,7 @@ import serializers.xml.javolution.XmlJavolution;
     optionListHeading = "%nOptions:%n",
     header = "JVM Micro-benchmarking for Serializers",
     mixinStandardHelpOptions = true,
-    description = "Uses jhm to benchmark java serialization libraries. See Commands section on available operations",
+    description = "Uses jmh to benchmark java serialization libraries. See Commands section on available operations",
     version = "0.1")
 public class Cli implements Callable<Void> {
 

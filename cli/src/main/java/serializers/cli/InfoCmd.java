@@ -84,66 +84,62 @@ public class InfoCmd implements Callable<Void> {
 
     if (listAll) {
 
-      //
       filterSerializers(output, table, stringSerializerPropertiesEntryCell -> true);
+    }
 
-    } else {
-      if (names) {
-        filterSerializers(output, table, stringSerializerPropertiesEntryCell -> true);
-      }
+    if (json) {
 
-      if (json) {
+      filterSerializers(output, table, stringSerializerPropertiesEntryCell -> {
+        SerializerProperties input = stringSerializerPropertiesEntryCell.getColumnKey();
+        return input.getFormat().equals(SerializerProperties.Format.JSON);
 
-        filterSerializers(output, table, stringSerializerPropertiesEntryCell -> {
-          SerializerProperties input = stringSerializerPropertiesEntryCell.getColumnKey();
-          return input.getFormat().equals(SerializerProperties.Format.JSON);
+      });
 
-        });
+    }
+    if (xml) {
+      Sets.filter(table.columnKeySet(),
+          input -> input.getFormat().equals(SerializerProperties.Format.XML));
 
-      }
-      if (xml) {
-        Sets.filter(table.columnKeySet(),
-            input -> input.getFormat().equals(SerializerProperties.Format.XML));
+      filterSerializers(output, table, stringSerializerPropertiesEntryCell -> {
+        SerializerProperties input = stringSerializerPropertiesEntryCell.getColumnKey();
+        return input.getFormat().equals(SerializerProperties.Format.XML);
 
-        filterSerializers(output, table, stringSerializerPropertiesEntryCell -> {
-          SerializerProperties input = stringSerializerPropertiesEntryCell.getColumnKey();
-          return input.getFormat().equals(SerializerProperties.Format.XML);
+      });
 
-        });
+    }
+    if (text) {
 
-      }
-      if (text) {
+      filterSerializers(output, table, stringSerializerPropertiesEntryCell -> {
+        SerializerProperties input = stringSerializerPropertiesEntryCell.getColumnKey();
+        return input.getFormat().equals(SerializerProperties.Format.XML)
+            || input.getFormat().equals(SerializerProperties.Format.JSON);
 
-        filterSerializers(output, table, stringSerializerPropertiesEntryCell -> {
-          SerializerProperties input = stringSerializerPropertiesEntryCell.getColumnKey();
-          return input.getFormat().equals(SerializerProperties.Format.XML)
-              || input.getFormat().equals(SerializerProperties.Format.JSON);
+      });
 
-        });
+    }
+    if (binary) {
 
-      }
-      if (binary) {
+      filterSerializers(output, table, stringSerializerPropertiesEntryCell -> {
+        SerializerProperties input = stringSerializerPropertiesEntryCell.getColumnKey();
+        return input.getFormat().equals(SerializerProperties.Format.BINARY)
+            || input.getFormat().equals(SerializerProperties.Format.BINARY_JDK_COMPATIBLE);
 
-        filterSerializers(output, table, stringSerializerPropertiesEntryCell -> {
-          SerializerProperties input = stringSerializerPropertiesEntryCell.getColumnKey();
-          return input.getFormat().equals(SerializerProperties.Format.BINARY)
-              || input.getFormat().equals(SerializerProperties.Format.BINARY_JDK_COMPATIBLE);
-
-        });
-
-
-      }
-      if (keywords != null) {
-        final Set<String> keywordSet = Sets.newHashSet(keywords);
-
-        filterSerializers(output, table, stringSerializerPropertiesEntryCell ->
-            Iterables.all(keywordSet, input ->
-                stringSerializerPropertiesEntryCell.getColumnKey().values().contains(input)));
-
-      }
+      });
 
 
     }
+    if (keywords != null) {
+      final Set<String> keywordSet = Sets.newHashSet(keywords);
+
+      filterSerializers(output, table, stringSerializerPropertiesEntryCell ->
+          Iterables.all(keywordSet, input ->
+              stringSerializerPropertiesEntryCell.getColumnKey().values().contains(input)));
+
+    }
+    if (names) {
+      filterSerializers(output, table, stringSerializerPropertiesEntryCell -> true);
+    }
+
     if (tableFormat) {
       printAsciiTable(output);
     } else {
