@@ -14,7 +14,7 @@ dependencies {
     compile project('capnproto')
     compile project('colfer')
     compile project('datakernel')
-    compile project('dslplatform')
+   // compile project('dslplatform')
     compile project('externalizor')
     compile project('flatbuffers')
     compile project('fst')
@@ -29,10 +29,10 @@ dependencies {
     compile project('obser')
     compile project('protobuf')
     compile project('protostuff')
-    compile project('scala')
-    compile project('stephenerialization')
+    //compile project('scala')
+    //compile project('stephenerialization')
     compile project('thrift')
-    compile project('wobly')
+    //compile project('wobly')
     compile project('xml')
 
 }

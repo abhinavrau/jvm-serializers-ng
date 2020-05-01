@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     compile project(':core')
-    compile "obser:obser:0.9.0-SNAPSHOT"
+    compile files('./lib/obser-0.9.0-SNAPSHOT.jar')
     testCompile project (path: ':core', configuration: 'testArchives')
 
 }
@@ -23,7 +23,7 @@ publishing {
                 groupId 'obser'
                 artifactId 'obser'
                 version '0.9.0-SNAPSHOT'
-                artifact file('lib/obser-0.9.0-SNAPSHOT.jar')
+                artifact file('./lib/obser-0.9.0-SNAPSHOT.jar')
             }
         }
 
