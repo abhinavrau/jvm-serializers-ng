@@ -83,18 +83,24 @@ jmser bench --help
 
 ### Prerequisites
 
-* JDK 8+
-* Maven (Although Gradle is used for the main build but some libraries need maven)
+* JDK 8+ or JDK 11
+* Maven (Although Gradle is used for the main build using gradle wrapper but some libraries need maven)
 
-
-### Installing
+### Build
 
 * Clone this repo to your local machine
 * Build steps
 
 ```
 cd cli
-./gradlew clean shadowJar
+./gradlew clean distZip
+```
+### Run the Cli
+
+```
+mkdir tmp
+unzip build/distributions/cli-shadow-1.0-SNAPSHOT.zip -d tmp
+./tmp/cli-shadow-1.0-SNAPSHOT/bin/cli --help
 ```
 
 

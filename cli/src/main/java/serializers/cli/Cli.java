@@ -37,14 +37,14 @@ import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "jmser",
     sortOptions = false,
-    headerHeading = "Usage:",
-    synopsisHeading = "Tool for comparing performance of Java serialization libraries",
-    descriptionHeading = "Description:",
+    headerHeading = "Usage: ",
+    synopsisHeading = "%nTool for comparing performance of Java serialization libraries%n",
+    descriptionHeading = "Description: ",
     parameterListHeading = "Parameters:",
-    optionListHeading = "Options:",
+    optionListHeading = "Options:%n",
     header = "JVM Micro-benchmarking for Serializers",
     mixinStandardHelpOptions = true,
-    description = "Uses jmh to benchmark java serialization libraries. See Commands section on available operations",
+    description = "%n%nUses jmh to benchmark java serialization libraries. See Commands section on available operations",
     version = "0.1")
 public class Cli implements Callable<Void> {
 
