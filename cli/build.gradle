@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
     }
 }
 
@@ -16,7 +16,9 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.8
 
-mainClassName = "serializers.cli.Cli"
+application {
+    mainClassName = "serializers.cli.Cli"
+}
 
 repositories {
     mavenLocal()
@@ -29,10 +31,11 @@ ext {
 }
 
 dependencies {
-    compile 'info.picocli:picocli:3.4.0'
+    compile 'info.picocli:picocli:4.2.0'
     compile project(':serializers')
     compile 'de.vandermeer:asciitable:0.3.2'
     compile 'org.hamcrest:hamcrest-junit:2.0.0.0'
+    testCompile 'javax.activation:javax.activation-api:1.2.0'
     // IMPORTANT: Leave JMH at the end!
     // JMH
     //compile group: 'org.openjdk.jmh', name: 'jmh-core', version: "${jmhVersion}"

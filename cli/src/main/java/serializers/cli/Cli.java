@@ -1,7 +1,5 @@
 package serializers.cli;
 
-import java.util.List;
-import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import serializers.MediaContentTestGroup;
 import serializers.Thrift;
@@ -10,62 +8,40 @@ import serializers.avro.AvroSpecific;
 import serializers.capnproto.CapNProto;
 import serializers.colfer.Colfer;
 import serializers.datakernel.DataKernelSerializer;
-import serializers.dslplatform.DSLPlatform;
 import serializers.externalizor.Externalizors;
 import serializers.flatbuffers.FlatBuffers;
 import serializers.fst.FastSerialization;
 import serializers.hessian.Hessian;
-import serializers.jackson.JacksonAvroDatabind;
-import serializers.jackson.JacksonCBORDatabind;
-import serializers.jackson.JacksonJrDatabind;
-import serializers.jackson.JacksonJsonDatabind;
-import serializers.jackson.JacksonJsonManual;
-import serializers.jackson.JacksonJsonTree;
-import serializers.jackson.JacksonProtobufDatabind;
-import serializers.jackson.JacksonSmileDatabind;
-import serializers.jackson.JacksonSmileManual;
-import serializers.jackson.JacksonWithAfterburner;
-import serializers.jackson.JacksonWithColumnsDatabind;
-import serializers.jackson.JacksonXmlDatabind;
+import serializers.jackson.*;
 import serializers.javaxjson.JavaxJsonStreamGlassfish;
 import serializers.jboss.JBossSerialization;
-import serializers.json.FastJSONArrayDatabind;
-import serializers.json.FastJSONDatabind;
-import serializers.json.FlexjsonDatabind;
-import serializers.json.JsonGsonDatabind;
-import serializers.json.JsonGsonManual;
-import serializers.json.JsonLibJsonDatabind;
-import serializers.json.JsonSimpleManualTree;
-import serializers.json.JsonSimpleWithContentHandler;
-import serializers.json.JsonSmartManualTree;
-import serializers.json.JsonSvensonDatabind;
+import serializers.json.*;
 import serializers.kryo.Kryo;
 import serializers.mongodb.MongoDB;
 import serializers.mongodb.MongoDBManual;
 import serializers.msgpack.MsgPack;
-import serializers.obser.Obser;
 import serializers.protobuf.Protobuf;
 import serializers.protobuf.ProtobufJson;
 import serializers.protostuff.Protostuff;
 import serializers.protostuff.ProtostuffJson;
 import serializers.protostuff.ProtostuffSmile;
 import serializers.protostuff.ProtostuffXml;
-import serializers.scala.Scala;
-import serializers.stephenerialization.Stephenerialization;
-import serializers.wobly.Wobly;
 import serializers.xml.ExiExificient;
 import serializers.xml.Jaxb;
 import serializers.xml.JaxbAalto;
 import serializers.xml.XmlXStream;
 import serializers.xml.javolution.XmlJavolution;
 
+import java.util.List;
+import java.util.concurrent.Callable;
+
 @CommandLine.Command(name = "jmser",
     sortOptions = false,
-    headerHeading = "Usage:%n%",
-    synopsisHeading = "%n",
-    descriptionHeading = "%nDescription:%n%",
-    parameterListHeading = "%nParameters:%n",
-    optionListHeading = "%nOptions:%n",
+    headerHeading = "Usage:",
+    synopsisHeading = "Tool for comparing performance of Java serialization libraries",
+    descriptionHeading = "Description:",
+    parameterListHeading = "Parameters:",
+    optionListHeading = "Options:",
     header = "JVM Micro-benchmarking for Serializers",
     mixinStandardHelpOptions = true,
     description = "Uses jmh to benchmark java serialization libraries. See Commands section on available operations",
@@ -86,7 +62,7 @@ public class Cli implements Callable<Void> {
     CapNProto.register(groups);
     Colfer.register(groups);
     DataKernelSerializer.register(groups);
-    DSLPlatform.register(groups);
+    //DSLPlatform.register(groups);
     Externalizors.register(groups);
     FlatBuffers.register(groups);
     FastSerialization.register(groups);
@@ -144,7 +120,7 @@ public class Cli implements Callable<Void> {
     MongoDBManual.register(groups);
     MongoDB.register(groups);
     MsgPack.register(groups);
-    Obser.register(groups);
+    //Obser.register(groups);
     Protobuf.register(groups);
     ProtobufJson.register(groups);
 
@@ -153,11 +129,11 @@ public class Cli implements Callable<Void> {
     ProtostuffSmile.register(groups);
     ProtostuffXml.register(groups);
 
-    Scala.register(groups);
-    Stephenerialization.register(groups);
+    //Scala.register(groups);
+   // Stephenerialization.register(groups);
 
     Thrift.register(groups);
-    Wobly.register(groups);
+    //Wobly.register(groups);
 
     ExiExificient.register(groups);
     Jaxb.register(groups);
