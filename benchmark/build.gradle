@@ -1,16 +1,25 @@
-plugins {
-    id 'java'
-}
-
 group 'com.github.jvm-serializers-ng'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+apply plugin: 'java'
+
 
 repositories {
+    mavenLocal()
     mavenCentral()
+    jcenter()
+}
+
+ext {
+
+    jmhVersion = '1.23'
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile project(':core')
+    compile project(':serializers')
+    // IMPORTANT: Leave JMH at the end!
+    // JMH
+    compile group: 'org.openjdk.jmh', name: 'jmh-core', version: "${jmhVersion}"
+    annotationProcessor group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: "${jmhVersion}"
 }

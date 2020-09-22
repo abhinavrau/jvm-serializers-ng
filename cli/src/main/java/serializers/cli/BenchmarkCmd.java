@@ -14,5 +14,6 @@ import picocli.CommandLine;
     description = "Runs micro benchmark using jmh on provided serializers")
 public class BenchmarkCmd {
 
-
+    @CommandLine.ParentCommand
+    private Cli parent; // picocli injects reference to parent command
 }

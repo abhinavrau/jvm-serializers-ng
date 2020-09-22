@@ -25,6 +25,7 @@ include 'serializers:thrift'
 //include 'serializers:wobly'
 include 'serializers:xml'
 //include 'runner'
-include 'cli'
 include 'benchmark'
+include 'cli'
+
 
